@@ -1,48 +1,63 @@
-/* Global */
+/* =========================
+   Global Styles
+========================= */
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Roboto', sans-serif;
   margin: 0;
   padding: 0;
   background: #f0f4f8;
   color: #333;
+  transition: background 0.3s, color 0.3s;
 }
 
 header {
-  background: #4a90e2;
-  color: #fff;
-  padding: 15px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 15px 25px;
+  background: linear-gradient(90deg, #4a90e2, #357ABD);
+  color: #fff;
+}
+
+header .logo {
+  font-size: 1.5em;
+  font-weight: 700;
 }
 
 nav a {
   color: #fff;
-  margin-left: 15px;
+  margin-left: 20px;
   text-decoration: none;
-  font-weight: bold;
+  font-weight: 500;
+  position: relative;
+}
+
+nav a.active::after {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: #fff;
+  position: absolute;
+  bottom: -5px;
+  left: 0;
 }
 
 nav a:hover {
   text-decoration: underline;
 }
 
-h1, h2 {
-  margin: 0.5em 0;
+#toggleTheme {
+  background: transparent;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+  color: #fff;
 }
 
-main {
-  padding: 20px;
-}
-
-footer {
-  text-align: center;
-  padding: 15px;
-  background: #ddd;
-  margin-top: 20px;
-}
-
-/* Buttons */
+/* =========================
+   Buttons
+========================= */
 .btn {
   display: inline-block;
   padding: 10px 20px;
@@ -53,51 +68,191 @@ footer {
   cursor: pointer;
   margin-top: 10px;
   border-radius: 5px;
+  transition: background 0.3s, transform 0.2s;
 }
 
 .btn:hover {
   background: #357ABD;
+  transform: translateY(-2px);
 }
 
-/* Forms */
+.btn-large {
+  padding: 15px 30px;
+  font-size: 1.1em;
+}
+
+.btn-danger {
+  background: #e74c3c;
+}
+
+.btn-danger:hover {
+  background: #c0392b;
+}
+
+/* =========================
+   Main sections
+========================= */
+main {
+  padding: 20px;
+}
+
+.welcome-card, .profile-card {
+  background: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+  max-width: 700px;
+  margin: 20px auto;
+  text-align: center;
+  animation: fadeIn 0.8s ease forwards;
+}
+
+.features {
+  max-width: 1000px;
+  margin: 50px auto;
+  text-align: center;
+}
+
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.feature-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  flex: 1 1 250px;
+  min-width: 250px;
+  max-width: 300px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+.cta {
+  text-align: center;
+  margin: 50px 0;
+}
+
+/* =========================
+   Forms
+========================= */
 input[type="text"], input[type="email"] {
-  padding: 8px;
+  padding: 10px;
   margin: 10px 0 20px 0;
   width: 100%;
   max-width: 400px;
-  border-radius: 4px;
+  border-radius: 6px;
   border: 1px solid #ccc;
+  transition: border 0.3s;
+}
+
+input[type="text"]:focus, input[type="email"]:focus {
+  border: 1px solid #4a90e2;
+  outline: none;
 }
 
 form {
   margin-bottom: 30px;
 }
 
-/* Notes list */
+.form-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+/* =========================
+   Notes List
+========================= */
 ul#noteList {
   list-style: none;
   padding: 0;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 ul#noteList li {
   background: #fff;
-  padding: 10px;
-  margin-bottom: 8px;
-  border-radius: 4px;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  border-radius: 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.3s;
+}
+
+ul#noteList li:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
 }
 
 ul#noteList li button {
   background: #e74c3c;
-  padding: 5px 10px;
+  padding: 5px 12px;
   border: none;
   color: white;
-  border-radius: 3px;
+  border-radius: 5px;
   cursor: pointer;
+  transition: background 0.3s;
 }
 
 ul#noteList li button:hover {
   background: #c0392b;
+}
+
+/* =========================
+   Animations
+========================= */
+@keyframes fadeIn {
+  0% {opacity: 0; transform: translateY(20px);}
+  100% {opacity: 1; transform: translateY(0);}
+}
+
+/* =========================
+   Footer
+========================= */
+footer {
+  text-align: center;
+  padding: 20px;
+  background: #ddd;
+  margin-top: 40px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+/* =========================
+   Dark Mode
+========================= */
+body.dark {
+  background: #1e1e2f;
+  color: #f5f5f5;
+}
+
+body.dark header {
+  background: #2c2c3e;
+}
+
+body.dark .welcome-card, 
+body.dark .profile-card, 
+body.dark .feature-card,
+body.dark ul#noteList li {
+  background: #2c2c3e;
+  color: #f5f5f5;
+}
+
+body.dark input[type="text"], body.dark input[type="email"] {
+  background: #3b3b4c;
+  color: #f5f5f5;
+  border: 1px solid #555;
 }
