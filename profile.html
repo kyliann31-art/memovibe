@@ -1,38 +1,47 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profil - MemoVibe</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil - MemoVibe</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <h1>MemoVibe</h1>
-        <nav>
-            <a href="index.html">Accueil</a>
-            <a href="profile.html">Profil</a>
-        </nav>
-    </header>
+  <header>
+    <h1>MemoVibe</h1>
+    <nav>
+      <a href="index.html">Accueil</a>
+      <a href="profile.html">Profil</a>
+    </nav>
+  </header>
 
-    <main>
-        <section>
-            <h2>Mon Profil</h2>
-            <form id="profileForm">
-                <label for="name">Nom :</label>
-                <input type="text" id="name" required>
-                <label for="email">Email :</label>
-                <input type="email" id="email" required>
-                <button type="submit">Enregistrer</button>
-            </form>
-            <div id="message"></div>
-        </section>
-    </main>
+  <main>
+    <section class="profile-section">
+      <h2>Mon Profil</h2>
+      <form id="profileForm">
+        <label for="name">Nom :</label>
+        <input type="text" id="name" placeholder="Votre nom" required>
+        <label for="email">Email :</label>
+        <input type="email" id="email" placeholder="exemple@mail.com" required>
+        <button type="submit" class="btn">Enregistrer</button>
+      </form>
+      <div id="message"></div>
+    </section>
 
-    <footer>
-        <p>&copy; 2025 MemoVibe</p>
-    </footer>
+    <section class="notes-section">
+      <h2>Mes Notes / Décisions</h2>
+      <form id="noteForm">
+        <input type="text" id="noteInput" placeholder="Ajouter une note ou décision" required>
+        <button type="submit" class="btn">Ajouter</button>
+      </form>
+      <ul id="noteList"></ul>
+    </section>
+  </main>
 
-    <script src="script.js"></script>
+  <footer>
+    <p>&copy; 2025 MemoVibe</p>
+  </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>
