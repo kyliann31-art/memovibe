@@ -22,10 +22,12 @@
   <section class="profile-section">
     <h2>Mon Profil</h2>
     <div class="profile-card">
-      <img src="avatar.png" alt="Avatar" class="avatar-large">
+      <img src="avatar.png" alt="Avatar" class="avatar-large" id="profileAvatar">
       <p><b>Nom :</b> <span id="displayName"></span></p>
       <p><b>Email :</b> <span id="displayEmail"></span></p>
-      <p><b>Posts :</b> <span id="postCount">0</span></p>
+      <p><b>Abonnements :</b> <span id="followingCount">0</span></p>
+      <p><b>Abonnés :</b> <span id="followersCount">0</span></p>
+      <input type="file" id="avatarInput" accept="image/*">
     </div>
 
     <h3>Modifier mes infos</h3>
@@ -34,6 +36,10 @@
       <input type="email" id="email" placeholder="Email" required>
       <button type="submit" class="btn">Enregistrer</button>
     </form>
+
+    <h3>Abonnements</h3>
+    <div id="allUsers"></div>
+    
     <div id="message"></div>
   </section>
 </main>
