@@ -49,6 +49,7 @@ header nav a.active {
   border: none;
   color: #fff;
   cursor: pointer;
+  margin-left:5px;
 }
 
 /* Buttons */
@@ -143,6 +144,25 @@ input[type="text"], input[type="email"], textarea {
   margin-bottom: 10px;
 }
 
+/* Users list */
+#allUsers .user-card {
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  padding:10px;
+  background:#fff;
+  margin-bottom:8px;
+  border-radius:8px;
+  box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+.user-card img{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  margin-right:10px;
+}
+
 /* Toast notifications */
 .toast {
   position: fixed;
@@ -169,4 +189,9 @@ footer {
   background: #ddd;
   margin-top: 20px;
   border-radius: 15px 15px 0 0;
+}
+
+/* Feed Controls */
+.feed-controls{
+  margin:20px 0;
 }
