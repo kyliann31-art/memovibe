@@ -1,146 +1,50 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MemoVibe — Profil</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profil - MemoVibe</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app-shell">
-    <header class="topbar">
-      <div class="brand">
-        <svg width="36" height="36" viewBox="0 0 24 24" aria-hidden focusable="false">
-          <defs><linearGradient id="g2" x1="0" x2="1"><stop offset="0" stop-color="#6C5CE7"/><stop offset="1" stop-color="#00B894"/></linearGradient></defs>
-          <rect rx="6" width="24" height="24" fill="url(#g2)"></rect>
-          <path d="M6 8h12v2H6zM6 12h12v2H6z" fill="#fff" opacity="0.95"></path>
-        </svg>
-        <div class="brand-text">
-          <div class="title">MemoVibe</div>
-          <div class="subtitle">Ton espace</div>
-        </div>
-      </div>
+<div class="container">
 
-      <nav class="nav">
-        <a href="index.html" class="nav-link">Accueil</a>
-        <a href="profile.html" class="nav-link active">Profil</a>
-      </nav>
+<header>
+  <h1>MemoVibe</h1>
+  <nav>
+    <a href="index.html">Fil d’actualité</a>
+    <a href="profile.html" class="active">Profil</a>
+    <button id="toggleThemeProfile" class="btn-small">🌙</button>
+  </nav>
+</header>
 
-      <div class="top-actions">
-        <button id="toggleTheme" class="icon-btn" aria-label="Basculer thème">🌙</button>
-      </div>
-    </header>
+<main>
+  <section class="profile-section">
+    <h2>Mon Profil</h2>
+    <div class="profile-card">
+      <img src="avatar.png" alt="Avatar" class="avatar-large">
+      <p><b>Nom :</b> <span id="displayName"></span></p>
+      <p><b>Email :</b> <span id="displayEmail"></span></p>
+      <p><b>Posts :</b> <span id="postCount">0</span></p>
+    </div>
 
-    <main class="container profile-layout">
-      <!-- SIDEBAR -->
-      <aside class="sidebar">
-        <div class="profile-box">
-          <label class="avatar-upload">
-            <input type="file" id="avatarFile" accept="image/*" hidden>
-            <div id="avatarPreview" class="avatar avatar-lg" title="Cliquer pour changer"></div>
-          </label>
-          <div class="profile-info">
-            <h3 id="profileName">—</h3>
-            <p id="profileEmail" class="muted">—</p>
-            <div class="meta">
-              <div><strong id="countPosts">0</strong><span>posts</span></div>
-              <div><strong id="countLikes">0</strong><span>likes</span></div>
-            </div>
-
-            <div class="profile-actions">
-              <button id="editProfileBtn" class="btn btn-ghost">Modifier</button>
-              <button id="resetProfile" class="btn btn-danger">Effacer</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="search-box card">
-          <input id="searchNotes" placeholder="Rechercher dans les posts..." />
-          <select id="sortNotes">
-            <option value="newest">Récentes → Anciennes</option>
-            <option value="oldest">Anciennes → Récentes</option>
-          </select>
-        </div>
-
-        <div class="card help">
-          <h4>Astuce</h4>
-          <p>Tu peux liker, commenter, éditer et réorganiser tes posts. Tout est stocké localement.</p>
-        </div>
-      </aside>
-
-      <!-- MAIN FEED -->
-      <section class="mainfeed">
-        <div class="composer card">
-          <div class="composer-header">
-            <div class="avatar avatar-md" id="composerAvatar">MV</div>
-            <textarea id="composerInput" placeholder="Quoi de neuf ? Écris une décision, une idée..."></textarea>
-          </div>
-
-          <div class="composer-actions">
-            <div class="left">
-              <label class="attach">
-                <input type="file" id="composerImage" accept="image/*" hidden>
-                <span class="icon">📎</span>
-              </label>
-              <button id="addMood" class="btn btn-ghost">🙂 Humeur</button>
-            </div>
-            <div class="right">
-              <button id="clearComposer" class="btn btn-ghost">Effacer</button>
-              <button id="postBtn" class="btn btn-primary">Publier</button>
-            </div>
-          </div>
-        </div>
-
-        <ul id="feed" class="feed-list" aria-live="polite"></ul>
-      </section>
-
-      <!-- RIGHT COLUMN -->
-      <aside class="rightcol">
-        <div class="card stats">
-          <h4>Statistiques</h4>
-          <div class="stat-grid">
-            <div>
-              <small>Total Posts</small>
-              <strong id="statTotal">0</strong>
-            </div>
-            <div>
-              <small>Commentaires</small>
-              <strong id="statComments">0</strong>
-            </div>
-            <div>
-              <small>Likes</small>
-              <strong id="statTotalLikes">0</strong>
-            </div>
-          </div>
-        </div>
-
-        <div class="card recent">
-          <h4>Posts récents</h4>
-          <ul id="recentSmall" class="recent-list"></ul>
-        </div>
-      </aside>
-    </main>
-
-    <div id="toast" class="toast" aria-live="assertive"></div>
-
-    <footer class="footer">
-      <p>&copy; 2025 MemoVibe — Minimal social for decisions.</p>
-    </footer>
-  </div>
-
-  <dialog id="profileDialog" class="dialog">
-    <form method="dialog" id="profileEditForm" class="dialog-form">
-      <h3>Modifier le profil</h3>
-      <label>Nom <input id="editName" type="text" required></label>
-      <label>Email <input id="editEmail" type="email" required></label>
-      <menu>
-        <button id="cancelProfile" class="btn btn-ghost">Annuler</button>
-        <button id="saveProfile" class="btn btn-primary">Enregistrer</button>
-      </menu>
+    <h3>Modifier mes infos</h3>
+    <form id="profileForm">
+      <input type="text" id="name" placeholder="Nom" required>
+      <input type="email" id="email" placeholder="Email" required>
+      <button type="submit" class="btn">Enregistrer</button>
     </form>
-  </dialog>
+    <div id="message"></div>
+  </section>
+</main>
 
-  <script src="script.js"></script>
+<div id="toast" class="toast"></div>
+
+<footer>
+  <p>&copy; 2025 MemoVibe</p>
+</footer>
+
+<script src="script.js"></script>
+</div>
 </body>
 </html>
