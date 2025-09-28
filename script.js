@@ -1,9 +1,30 @@
+// ==== UTILISATEURS ====
+let users = JSON.parse(localStorage.getItem('memoUsers')) || [];
+let currentUserId = localStorage.getItem('currentUserId') || null;
+
+if(!currentUserId){
+  // Crée un utilisateur par défaut si jamais
+  const defaultUser = {id: Date.now(), name:'Moi', email:'moi@mail.com', avatar:'avatar.png', following:[], followers:[]};
+  users.push(defaultUser);
+  localStorage.setItem('memoUsers', JSON.stringify(users));
+  currentUserId = defaultUser.id;
+  localStorage.setItem('currentUserId', currentUserId);
+}
+
+function getCurrentUser(){
+  return users.find(u=>u.id==currentUserId);
+}
+
 // ==== PROFIL ====
 const profileForm = document.getElementById('profileForm');
 const message = document.getElementById('message');
 const displayName = document.getElementById('displayName');
 const displayEmail = document.getElementById('displayEmail');
-const postCount = document.getElementById('postCount');
+const followingCount = document.getElementById('followingCount');
+const followersCount = document.getElementById('followersCount');
+const profileAvatar = document.getElementById('profileAvatar');
+const avatarInput = document.getElementById('avatarInput');
+const allUsersDiv = document.getElementById('allUsers');
 
 function showToast(text){
   const toast = document.getElementById('toast');
@@ -12,47 +33,20 @@ function showToast(text){
   setTimeout(()=>{ toast.classList.remove('show'); },2000);
 }
 
-if(profileForm){
-  profileForm.addEventListener('submit', function(e){
-    e.preventDefault();
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-
-    localStorage.setItem('memoName', name);
-    localStorage.setItem('memoEmail', email);
-
-    message.innerHTML = `<p>Profil enregistré ! Bonjour ${name}.</p>`;
-    profileForm.reset();
-    loadProfile();
-    showToast("Profil enregistré ✅");
-  });
-
-  function loadProfile(){
-    const name = localStorage.getItem('memoName') || '';
-    const email = localStorage.getItem('memoEmail') || '';
-    displayName.textContent = name;
-    displayEmail.textContent = email;
-    document.getElementById('name').value = name;
-    document.getElementById('email').value = email;
-    postCount.textContent = JSON.parse(localStorage.getItem('memoPosts')||"[]").length;
-  }
-
-  loadProfile();
+function saveUsers(){
+  localStorage.setItem('memoUsers', JSON.stringify(users));
 }
 
-// ==== POSTS / FEED ====
-const postForm = document.getElementById('postForm');
-const postInput = document.getElementById('postInput');
-const feed = document.getElementById('feed');
+function renderProfile(){
+  const user = getCurrentUser();
+  displayName.textContent = user.name;
+  displayEmail.textContent = user.email;
+  followingCount.textContent = user.following.length;
+  followersCount.textContent = user.followers.length;
+  profileAvatar.src = user.avatar;
+}
 
-let posts = JSON.parse(localStorage.getItem('memoPosts') || "[]");
-
-function renderFeed(){
-  if(!feed) return;
-  feed.innerHTML = '';
-  posts.forEach((post, index)=>{
-    const div = document.createElement('div');
-    div.className = 'post-card';
-    let commentsHTML = '';
-    if(post.comments) post.comments.forEach(c=>{
-      commentsHTML += `<div class="comment"><b>${c.user}:</b> ${c.text}</
+function renderAllUsers(){
+  allUsersDiv.innerHTML='';
+  users.forEach(u=>{
+    if(u.id==currentUserId)
