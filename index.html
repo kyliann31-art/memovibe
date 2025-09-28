@@ -1,108 +1,42 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MemoVibe — Accueil</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MemoVibe - Fil d’actualité</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app-shell">
-    <header class="topbar">
-      <div class="brand">
-        <svg width="36" height="36" viewBox="0 0 24 24" aria-hidden focusable="false">
-          <defs><linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#6C5CE7"/><stop offset="1" stop-color="#00B894"/></linearGradient></defs>
-          <rect rx="6" width="24" height="24" fill="url(#g1)"></rect>
-          <path d="M6 8h12v2H6zM6 12h12v2H6z" fill="#fff" opacity="0.95"></path>
-        </svg>
-        <div class="brand-text">
-          <div class="title">MemoVibe</div>
-          <div class="subtitle">Tes décisions, ton feed</div>
-        </div>
-      </div>
+<div class="container">
 
-      <nav class="nav">
-        <a href="index.html" class="nav-link active">Accueil</a>
-        <a href="profile.html" class="nav-link">Profil</a>
-      </nav>
+<header>
+  <h1>MemoVibe</h1>
+  <nav>
+    <a href="index.html" class="active">Fil d’actualité</a>
+    <a href="profile.html">Profil</a>
+    <button id="toggleTheme" class="btn-small">🌙</button>
+  </nav>
+</header>
 
-      <div class="top-actions">
-        <button id="toggleTheme" class="icon-btn" aria-label="Basculer thème">🌙</button>
-        <a class="btn btn-primary" href="profile.html">Aller au Profil</a>
-      </div>
-    </header>
+<main>
+  <section class="post-section">
+    <h2>Ajouter un post</h2>
+    <form id="postForm">
+      <textarea id="postInput" placeholder="Quoi de neuf ?" required></textarea>
+      <button type="submit" class="btn">Publier</button>
+    </form>
 
-    <main class="landing">
-      <section class="hero">
-        <div class="hero-card">
-          <h1>Un carnet social pour tes décisions</h1>
-          <p class="lead">Note, partage (localement), commente et organise tes choix. Design épuré, interactions rapides et tout sauvegardé dans ton navigateur.</p>
-          <div class="hero-cta">
-            <a class="btn btn-lg btn-primary" href="profile.html">Commencer — mon profil</a>
-            <button id="showFeatures" class="btn btn-ghost">Voir les fonctionnalités</button>
-          </div>
-        </div>
+    <div id="feed"></div>
+  </section>
+</main>
 
-        <div class="preview">
-          <div class="preview-card">
-            <div class="post-sample">
-              <div class="post-header">
-                <div class="avatar avatar-xl">MV</div>
-                <div class="post-meta">
-                  <strong>Alex</strong>
-                  <small>· Aujourd'hui</small>
-                </div>
-                <div class="post-action">• • •</div>
-              </div>
-              <div class="post-body">
-                <p>Essayer un design propre et subtil pour garder le focus sur ce qui compte : tes décisions.</p>
-              </div>
-              <div class="post-footer">
-                <div class="post-stats">
-                  <button class="icon small">♥ 12</button>
-                  <button class="icon small">💬 3</button>
-                </div>
-              </div>
-            </div>
-          </div>
+<div id="toast" class="toast"></div>
 
-          <div class="preview-card muted">
-            <ul class="feature-list">
-              <li>📝 Composer des notes comme des posts</li>
-              <li>👍 Like, 💬 Commentaires locaux</li>
-              <li>🌗 Mode sombre persistant</li>
-              <li>🔎 Recherche & tri</li>
-              <li>♻️ Sauvegarde en localStorage</li>
-            </ul>
-          </div>
-        </div>
-      </section>
+<footer>
+  <p>&copy; 2025 MemoVibe</p>
+</footer>
 
-      <section class="features" id="featuresSection">
-        <h2>Fonctionnalités</h2>
-        <div class="grid-3">
-          <div class="card feature">
-            <h3>Feed personnel</h3>
-            <p>Chaque note s’affiche comme un post — avec date, avatar, likes et commentaires.</p>
-          </div>
-          <div class="card feature">
-            <h3>Profil & avatar</h3>
-            <p>Personnalise ton profil, télécharge un avatar ou laisse les initiales générées.</p>
-          </div>
-          <div class="card feature">
-            <h3>Recherche & tri</h3>
-            <p>Filtre instantané, tri par date et réorganisation par glisser-déposer.</p>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <footer class="footer">
-      <p>&copy; 2025 MemoVibe — Conçu pour être beau et simple.</p>
-    </footer>
-  </div>
-
-  <script src="script.js"></script>
+<script src="script.js"></script>
+</div>
 </body>
 </html>
