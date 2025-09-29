@@ -1,85 +1,59 @@
-/* MemoVibe — final interactions
-   - Tout en localStorage
-   - Menu hamburger, feed toggle, search chooser, posts, likes, comments, reactions
-   - Profile editing, avatar upload, follow/unfollow, modals
-*/
+// Minimal, clean, final version.
+// LocalStorage keys
+const K_USERS = 'mv_users_final_v1';
+const K_POSTS = 'mv_posts_final_v1';
+const K_CURRENT = 'mv_current_final_v1';
+const K_THEME = 'mv_theme_final_v1';
 
-/* ---------- Helpers ---------- */
-const $ = (sel, root=document) => root.querySelector(sel);
-const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+// Helpers
+const $ = (s, root = document) => root.querySelector(s);
+const $$ = (s, root = document) => Array.from((root || document).querySelectorAll(s));
 const uid = () => Math.random().toString(36).slice(2,9);
-const now = () => new Date().toISOString();
-const formatDate = iso => {
-  const d = new Date(iso);
-  return d.toLocaleString();
-};
+const nowISO = () => new Date().toISOString();
+const fmt = iso => new Date(iso).toLocaleString();
+const escapeHTML = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const nl2br = s => (s||'').replace(/\n/g,'<br/>');
-const escapeHtml = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-/* ---------- Storage keys ---------- */
-const K_USERS = 'mv_users_v1';
-const K_POSTS = 'mv_posts_v1';
-const K_CURRENT = 'mv_current_v1';
-const K_THEME = 'mv_theme_v1';
-
-/* ---------- Load or seed initial data ---------- */
+// State
 let users = JSON.parse(localStorage.getItem(K_USERS) || 'null');
 let posts = JSON.parse(localStorage.getItem(K_POSTS) || 'null');
 let currentUserId = localStorage.getItem(K_CURRENT) || null;
 
-function saveAll(){
-  localStorage.setItem(K_USERS, JSON.stringify(users));
-  localStorage.setItem(K_POSTS, JSON.stringify(posts));
-  localStorage.setItem(K_CURRENT, currentUserId);
+// Ensure current user exists (single local account, empty by default)
+if(!users){
+  users = [];
 }
-
-/* Seed if empty (gives alive UI; you can remove later) */
-if(!users || !posts){
-  users = [
-    {id: 'u1', name:'Alex', email:'alex@mail.com', avatar:'https://i.pravatar.cc/120?img=12', bio:'Développeur web', following:['u2'], followers:['u3']},
-    {id: 'u2', name:'Marie', email:'marie@mail.com', avatar:'https://i.pravatar.cc/120?img=5', bio:'Photographe', following:['u1','u3'], followers:['u1']},
-    {id: 'u3', name:'Léo', email:'leo@mail.com', avatar:'https://i.pravatar.cc/120?img=8', bio:'Étudiant', following:[], followers:['u2']},
-  ];
-  posts = [
-    {id:'p1', userId:'u2', text:'Entretien aujourd’hui ! J’ai appris beaucoup. Des conseils ?', category:'travail', date: new Date(Date.now()-3600*1000*36).toISOString(), image:null, likes:['u1'], comments:[{userId:'u1', text:'Bonne chance !', date: now()}]},
-    {id:'p2', userId:'u1', text:'Voyage en montagne la semaine dernière : expérience incroyable.', category:'voyage', date: new Date(Date.now()-3600*1000*60).toISOString(), image:null, likes:[], comments:[]},
-    {id:'p3', userId:'u3', text:'Rentrée: trouver un stage, stress mais motivé.', category:'études', date: new Date(Date.now()-3600*1000*10).toISOString(), image:null, likes:['u2'], comments:[]}
-  ];
-  currentUserId = 'u1';
+if(!currentUserId){
+  // create a local account for you (editable). No other fake profiles.
+  const me = { id: 'me', name: '', email: '', avatar: '', bio: '', following: [], followers: [] };
+  users.push(me);
+  currentUserId = me.id;
   saveAll();
 }
+if(!posts) posts = [];
 
-/* ---------- Utility getters ---------- */
-function getUserById(id){ return users.find(u => u.id === id); }
-function getCurrentUser(){ return users.find(u => u.id === currentUserId); }
-
-/* ---------- Elements ---------- */
-/* topbar */
+// Elements
 const hamburger = $('#hamburger');
 const sideMenu = $('#sideMenu');
 const closeMenu = $('#closeMenu');
 const themeToggle = $('#themeToggle');
-const themeToggle2 = $('#themeToggle2');
-
-/* search / refresh */
 const searchBar = $('#searchBar');
 const searchBarProfile = $('#searchBarProfile');
 const refreshBtn = $('#refreshBtn');
 const refreshBtn2 = $('#refreshBtn2');
 
-/* composer */
 const composerAvatar = $('#composerAvatar');
 const composerText = $('#composerText');
 const composerCategory = $('#composerCategory');
 const composerImage = $('#composerImage');
 const postBtn = $('#postBtn');
 
-/* lists / ui */
 const postsList = $('#postsList');
 const recentList = $('#recentList');
 const categoriesList = $('#categoriesList');
 const feedTitle = $('#feedTitle');
 const navBtns = $$('.nav-btn');
+
 const miniAvatar = $('#miniAvatar');
 const miniAvatar2 = $('#miniAvatar2');
 const sidebarAvatar = $('#sidebarAvatar');
@@ -89,12 +63,11 @@ const statPosts = $('#statPosts');
 const statFollowing = $('#statFollowing');
 const statFollowers = $('#statFollowers');
 
-/* modal */
 const modal = $('#modal');
 const modalContent = $('#modalContent');
 const modalClose = $('#modalClose');
+const toastEl = $('#toast');
 
-/* profile page */
 const profileName = $('#profileName');
 const profileBio = $('#profileBio');
 const profileAvatar = $('#profileAvatar');
@@ -113,175 +86,147 @@ const manageFollowing = $('#manageFollowing');
 const manageFollowers = $('#manageFollowers');
 const allUsersContainer = $('#allUsers');
 
-/* state */
-let searchMode = null;
-let currentFeed = 'friends'; // friends/all/me
+// Local helpers
+function getUser(id){ return users.find(u => u.id === id); }
+function getCurrentUser(){ return getUser(currentUserId); }
+function saveAll(){ localStorage.setItem(K_USERS, JSON.stringify(users)); localStorage.setItem(K_POSTS, JSON.stringify(posts)); localStorage.setItem(K_CURRENT, currentUserId); }
+function defaultAvatar(){ return 'https://i.pravatar.cc/120?img=1'; }
 
-/* ---------- Init ---------- */
+// UI init
 document.addEventListener('DOMContentLoaded', () => {
   applyTheme();
-  wireEvents();
+  wire();
   renderAll();
 });
 
-/* ---------- Theme ---------- */
+// Theme
 function applyTheme(){
   const t = localStorage.getItem(K_THEME);
-  if(t === 'dark'){
-    document.body.classList.add('dark-mode');
-    $('#themeToggle') && ($('#themeToggle').textContent = '☀️');
-    $('#themeToggle2') && ($('#themeToggle2').textContent = '☀️');
-  } else {
-    document.body.classList.remove('dark-mode');
-  }
+  if(t === 'dark') document.body.classList.add('dark-mode');
+  else document.body.classList.remove('dark-mode');
 }
-$('#themeToggle') && $('#themeToggle').addEventListener('click', toggleTheme);
-$('#themeToggle2') && $('#themeToggle2').addEventListener('click', toggleTheme);
-function toggleTheme(){
-  document.body.classList.toggle('dark-mode');
-  const val = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
-  localStorage.setItem(K_THEME, val);
-  applyTheme();
-}
+if(themeToggle) themeToggle.addEventListener('click', ()=> {
+  const dark = document.body.classList.toggle('dark-mode');
+  localStorage.setItem(K_THEME, dark ? 'dark' : 'light');
+});
 
-/* ---------- Wire events ---------- */
-function wireEvents(){
-  // hamburger
-  hamburger && hamburger.addEventListener('click', ()=> { sideMenu.classList.add('show'); sideMenu.classList.remove('hidden'); });
-  closeMenu && closeMenu.addEventListener('click', ()=> closeSideMenu());
-  // clicking outside sideMenu closes it
-  document.addEventListener('click', (e)=> {
-    if(sideMenu && sideMenu.classList.contains('show') && !sideMenu.contains(e.target) && !hamburger.contains(e.target)){
-      closeSideMenu();
-    }
+// Wire events
+function wire(){
+  if(hamburger) hamburger.addEventListener('click', openSideMenu);
+  if(closeMenu) closeMenu.addEventListener('click', closeSideMenu);
+  document.addEventListener('click', e => {
+    if(sideMenu && sideMenu.classList.contains('show') && !sideMenu.contains(e.target) && !hamburger.contains(e.target)) closeSideMenu();
   });
 
-  // feed nav buttons
   navBtns.forEach(b => b.addEventListener('click', ()=> {
     navBtns.forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
     currentFeed = b.dataset.feed;
-    feedTitle.textContent = currentFeed === 'friends' ? 'Abonnements' : (currentFeed === 'all' ? 'Général' : 'Mes posts');
+    feedTitle.textContent = (currentFeed === 'friends') ? 'Abonnements' : (currentFeed === 'all' ? 'Général' : 'Mes posts');
     renderPosts();
   }));
 
-  // search
-  searchBar && searchBar.addEventListener('click', openSearchChooser);
-  searchBarProfile && searchBarProfile.addEventListener('click', openSearchChooser);
+  if(searchBar) searchBar.addEventListener('click', openSearchChooser);
+  if(searchBarProfile) searchBarProfile.addEventListener('click', openSearchChooser);
 
-  // refresh
-  refreshBtn && refreshBtn.addEventListener('click', ()=> renderAll(true));
-  refreshBtn2 && refreshBtn2.addEventListener('click', ()=> renderAll(true));
+  if(refreshBtn) refreshBtn.addEventListener('click', ()=> renderAll(true));
+  if(refreshBtn2) refreshBtn2.addEventListener('click', ()=> renderAll(true));
 
-  // modal close
-  modalClose && modalClose.addEventListener('click', closeModal);
-  modal && modal.addEventListener('click', (e)=> { if(e.target === modal) closeModal(); });
+  if(modalClose) modalClose.addEventListener('click', closeModal);
+  if(modal) modal.addEventListener('click', e => { if(e.target === modal) closeModal(); });
 
-  // composer
-  postBtn && postBtn.addEventListener('click', handlePost);
-  composerImage && composerImage.addEventListener('change', handleComposerImage);
+  if(postBtn) postBtn.addEventListener('click', handlePost);
+  if(composerImage) composerImage.addEventListener('change', handleComposerImage);
 
-  // profile page
-  editProfileBtn && editProfileBtn.addEventListener('click', ()=> profileEdit.classList.toggle('hidden'));
-  saveProfile && saveProfile.addEventListener('click', saveProfileChanges);
-  avatarUpload && avatarUpload.addEventListener('change', handleAvatarUpload);
-  logoutBtn && logoutBtn.addEventListener('click', switchUserQuick);
-  manageFollowing && manageFollowing.addEventListener('click', ()=> openListModal('following'));
-  manageFollowers && manageFollowers.addEventListener('click', ()=> openListModal('followers'));
-
-  // mini manage following/followers
-  $('#manageFollowing') && $('#manageFollowing').addEventListener('click', ()=> openListModal('following'));
-  $('#manageFollowers') && $('#manageFollowers').addEventListener('click', ()=> openListModal('followers'));
+  if(editProfileBtn) editProfileBtn.addEventListener('click', ()=> profileEdit.classList.toggle('hidden'));
+  if(saveProfile) saveProfile.addEventListener('click', saveProfileChanges);
+  if(avatarUpload) avatarUpload.addEventListener('change', handleAvatarUpload);
+  if(logoutBtn) logoutBtn.addEventListener('click', switchUserQuick);
+  if(manageFollowing) manageFollowing.addEventListener('click', ()=> openListModal('following'));
+  if(manageFollowers) manageFollowers.addEventListener('click', ()=> openListModal('followers'));
 }
 
-/* ---------- UI actions ---------- */
-function closeSideMenu(){
-  sideMenu.classList.remove('show');
-  sideMenu.classList.add('hidden');
-}
+// Side menu
+function openSideMenu(){ if(sideMenu){ sideMenu.classList.add('show'); sideMenu.classList.remove('hidden'); sideMenu.setAttribute('aria-hidden','false'); } }
+function closeSideMenu(){ if(sideMenu){ sideMenu.classList.remove('show'); sideMenu.classList.add('hidden'); sideMenu.setAttribute('aria-hidden','true'); } }
 
-/* ---------- Render everything ---------- */
+// Rendering
+let currentFeed = 'friends';
 function renderAll(force=false){
-  users = JSON.parse(localStorage.getItem(K_USERS)) || users;
-  posts = JSON.parse(localStorage.getItem(K_POSTS)) || posts;
+  users = JSON.parse(localStorage.getItem(K_USERS) || '[]');
+  posts = JSON.parse(localStorage.getItem(K_POSTS) || '[]');
   currentUserId = localStorage.getItem(K_CURRENT) || currentUserId;
 
   const cur = getCurrentUser();
-  // topbar avatars + sidebar
-  $('#miniAvatar') && (miniAvatar.src = cur.avatar || defaultAvatar());
-  $('#miniAvatar2') && (miniAvatar2.src = cur.avatar || defaultAvatar());
-  $('#composerAvatar') && (composerAvatar.src = cur.avatar || defaultAvatar());
-  $('#sidebarAvatar') && (sidebarAvatar.src = cur.avatar || defaultAvatar());
-  $('#sidebarName') && (sidebarName.textContent = cur.name);
-  $('#sidebarBio') && (sidebarBio.textContent = cur.bio || '');
-  $('#statPosts') && (statPosts.textContent = posts.filter(p=>p.userId===currentUserId).length);
-  $('#statFollowing') && (statFollowing.textContent = (cur.following||[]).length);
-  $('#statFollowers') && (statFollowers.textContent = (cur.followers||[]).length);
+  if(!cur) return;
 
-  // profile page fields
-  profileName && (profileName.textContent = cur.name);
-  profileBio && (profileBio.textContent = cur.bio || '');
-  profileAvatar && (profileAvatar.src = cur.avatar || defaultAvatar());
-  $('#profilePosts') && ($('#profilePosts').textContent = posts.filter(p=>p.userId===currentUserId).length);
-  $('#profileFollowing') && ($('#profileFollowing').textContent = cur.following.length);
-  $('#profileFollowers') && ($('#profileFollowers').textContent = cur.followers.length);
+  // avatars & sidebar
+  if(miniAvatar) miniAvatar.src = cur.avatar || defaultAvatar();
+  if(miniAvatar2) miniAvatar2.src = cur.avatar || defaultAvatar();
+  if(composerAvatar) composerAvatar.src = cur.avatar || defaultAvatar();
+  if(sidebarAvatar) sidebarAvatar.src = cur.avatar || defaultAvatar();
+  if(sidebarName) sidebarName.textContent = cur.name || '—';
+  if(sidebarBio) sidebarBio.textContent = cur.bio || '';
+  if(statPosts) statPosts.textContent = posts.filter(p=>p.userId===currentUserId).length;
+  if(statFollowing) statFollowing.textContent = (cur.following||[]).length;
+  if(statFollowers) statFollowers.textContent = (cur.followers||[]).length;
+
+  // profile page
+  if(profileName) profileName.textContent = cur.name || '—';
+  if(profileBio) profileBio.textContent = cur.bio || '';
+  if(profileAvatar) profileAvatar.src = cur.avatar || defaultAvatar();
+  if($('#profilePosts')) $('#profilePosts').textContent = posts.filter(p=>p.userId===currentUserId).length;
+  if($('#profileFollowing')) $('#profileFollowing').textContent = (cur.following||[]).length;
+  if($('#profileFollowers')) $('#profileFollowers').textContent = (cur.followers||[]).length;
 
   renderCategories();
   renderPosts();
   renderRecent();
   renderUserPosts();
   renderAllUsersInProfile();
+
   saveAll();
 }
 
-/* ---------- Categories ---------- */
 function renderCategories(){
   const cats = Array.from(new Set(posts.map(p=>p.category).filter(Boolean)));
-  const container = $('#categoriesList');
-  if(!container) return;
-  container.innerHTML = '';
-  cats.forEach(c=>{
-    const el = document.createElement('div');
-    el.className = 'chip';
-    el.textContent = c;
-    el.addEventListener('click', ()=> {
-      openSearchModal({ mode:'experience', presetCategory: c });
-    });
-    container.appendChild(el);
+  if(!categoriesList) return;
+  categoriesList.innerHTML = '';
+  cats.forEach(c => {
+    const d = document.createElement('div');
+    d.className = 'chip';
+    d.textContent = c;
+    d.addEventListener('click', ()=> openSearchModal({mode:'experience', presetCategory:c}));
+    categoriesList.appendChild(d);
   });
 }
 
-/* ---------- Posts rendering ---------- */
 function renderPosts(){
   if(!postsList) return;
   postsList.innerHTML = '';
   let visible = posts.slice().sort((a,b)=> new Date(b.date) - new Date(a.date));
   const cur = getCurrentUser();
-
-  if(currentFeed === 'friends'){
-    visible = visible.filter(p => (cur.following || []).includes(p.userId));
-  } else if(currentFeed === 'me'){
-    visible = visible.filter(p => p.userId === currentUserId);
-  } // else 'all' shows all
+  if(currentFeed === 'friends') visible = visible.filter(p => (cur.following||[]).includes(p.userId));
+  else if(currentFeed === 'me') visible = visible.filter(p => p.userId === currentUserId);
 
   visible.forEach(p => {
     const li = document.createElement('li');
     li.className = 'post-card';
     li.dataset.id = p.id;
-    const user = getUserById(p.userId) || {name:'Utilisateur', avatar: defaultAvatar()};
-    const likeCount = p.likes ? p.likes.length : 0;
-    const commentCount = p.comments ? p.comments.length : 0;
+    const user = getUser(p.userId) || {name:'Utilisateur', avatar: defaultAvatar()};
+    const likeCount = (p.likes||[]).length;
+    const commentCount = (p.comments||[]).length;
 
     li.innerHTML = `
       <div class="post-header">
         <img class="avatar" src="${user.avatar || defaultAvatar()}" alt="avatar">
         <div class="post-meta">
-          <div class="name">${escapeHtml(user.name)}</div>
-          <div class="when">${formatDate(p.date)}</div>
+          <div class="name">${escapeHTML(user.name || 'Utilisateur')}</div>
+          <div class="when">${fmt(p.date)}</div>
         </div>
         <div style="margin-left:auto;font-size:12px;color:var(--muted)">#${p.category || 'aucune'}</div>
       </div>
-      <div class="post-body">${nl2br(escapeHtml(p.text || ''))}${p.image? `<img class="post-image" src="${p.image}" alt="img">` : ''}</div>
+      <div class="post-body">${nl2br(escapeHTML(p.text || ''))}${p.image? `<img class="post-image" src="${p.image}" alt="img">` : ''}</div>
       <div class="post-actions">
         <div class="action-left">
           <button class="action-btn btn-like">${likeCount} ♥</button>
@@ -296,10 +241,10 @@ function renderPosts(){
           <button class="action-btn btn-view">Voir profil</button>
         </div>
       </div>
-      <div class="comments" style="display:${commentCount? 'block':'none'}">
+      <div class="comments" style="display:${commentCount ? 'block' : 'none'}">
         ${ (p.comments||[]).map(c => {
-          const cu = getUserById(c.userId) || {name:'Utilisateur', avatar: defaultAvatar()};
-          return `<div class="comment"><img class="avatar" src="${cu.avatar}"><div><strong>${escapeHtml(cu.name)}</strong> <div class="small muted">${formatDate(c.date)}</div><div>${escapeHtml(c.text)}</div></div></div>`;
+          const cu = getUser(c.userId) || {name:'Utilisateur', avatar: defaultAvatar()};
+          return `<div class="comment"><img class="avatar" src="${cu.avatar}"><div><strong>${escapeHTML(cu.name)}</strong> <div class="small muted">${fmt(c.date)}</div><div>${escapeHTML(c.text)}</div></div></div>`;
         }).join('') }
         <div class="comment-box" style="display:flex;gap:8px;margin-top:6px">
           <input class="input-comment" placeholder="Écrire un commentaire..." style="flex:1;padding:8px;border-radius:8px;border:1px solid #e6eef8"/>
@@ -308,7 +253,6 @@ function renderPosts(){
       </div>
     `;
 
-    // events
     li.querySelector('.btn-like').addEventListener('click', ()=> toggleLike(p.id));
     li.querySelector('.btn-comment').addEventListener('click', ()=>{
       const comm = li.querySelector('.comments');
@@ -331,12 +275,11 @@ function renderPosts(){
   });
 }
 
-/* ---------- Recent ---------- */
 function renderRecent(){
   if(!recentList) return;
   recentList.innerHTML = '';
   posts.slice().sort((a,b)=> new Date(b.date)-new Date(a.date)).slice(0,6).forEach(p=>{
-    const u = getUserById(p.userId);
+    const u = getUser(p.userId);
     const li = document.createElement('li');
     li.className = 'small muted';
     li.textContent = `${u? u.name : 'Utilisateur'} — ${ (p.text||'').slice(0,60) }${(p.text && p.text.length>60)? '…' : ''}`;
@@ -344,15 +287,14 @@ function renderRecent(){
   });
 }
 
-/* ---------- User posts (profile) ---------- */
 function renderUserPosts(){
   if(!profilePostsEl) return;
   profilePostsEl.innerHTML = '';
-  const myPosts = posts.filter(p => p.userId === currentUserId).sort((a,b)=>new Date(b.date)-new Date(a.date));
-  myPosts.forEach(p=>{
+  const mine = posts.filter(p => p.userId === currentUserId).sort((a,b)=> new Date(b.date)-new Date(a.date));
+  mine.forEach(p=>{
     const li = document.createElement('li');
     li.className = 'post-card';
-    li.innerHTML = `<div><strong>${p.category || 'aucune'}</strong> • ${formatDate(p.date)}</div><div>${escapeHtml(p.text)}</div>
+    li.innerHTML = `<div><strong>${p.category || 'aucune'}</strong> • ${fmt(p.date)}</div><div>${escapeHTML(p.text)}</div>
       <div style="margin-top:8px"><button class="btn-ghost small" data-id="${p.id}">Supprimer</button></div>`;
     li.querySelector('button') && li.querySelector('button').addEventListener('click', ()=> {
       if(confirm('Supprimer ce post ?')) {
@@ -365,11 +307,38 @@ function renderUserPosts(){
   });
 }
 
-/* ---------- All users list for profile manage (sidebar) ---------- */
 function renderAllUsersInProfile(){
-  const container = $('#allUsers');
-  if(!container) return;
-  container.innerHTML = '';
+  if(!followingList || !followersList) return;
+  const cur = getCurrentUser();
+  followingList.innerHTML = '';
+  (cur.following||[]).forEach(fid=>{
+    const u = getUser(fid);
+    if(!u) return;
+    const d = document.createElement('div');
+    d.className = 'user-card';
+    d.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><img src="${u.avatar}" style="width:40px;height:40px;border-radius:8px"><div><strong>${u.name}</strong><div class="small muted">${u.bio||''}</div></div></div>
+      <div><button class="btn-ghost small" data-id="${u.id}">Se désabonner</button></div>`;
+    d.querySelector('button').addEventListener('click', ()=> unfollowUser(u.id));
+    followingList.appendChild(d);
+  });
+
+  followersList.innerHTML = '';
+  (cur.followers||[]).forEach(fid=>{
+    const u = getUser(fid);
+    if(!u) return;
+    const d = document.createElement('div');
+    d.className = 'user-card';
+    d.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><img src="${u.avatar}" style="width:40px;height:40px;border-radius:8px"><div><strong>${u.name}</strong><div class="small muted">${u.bio||''}</div></div></div>
+      <div><button class="btn-ghost small" data-id="${u.id}">Voir</button></div>`;
+    d.querySelector('button').addEventListener('click', ()=> openUserProfileModal(u.id));
+    followersList.appendChild(d);
+  });
+}
+
+// All users list (used in profile area if present)
+function renderAllUsers(){
+  if(!allUsersContainer) return;
+  allUsersContainer.innerHTML = '';
   users.forEach(u=>{
     const cur = getCurrentUser();
     if(u.id === cur.id) return;
@@ -382,80 +351,69 @@ function renderAllUsersInProfile(){
       if(cur.following.includes(u.id)) unfollowUser(u.id);
       else followUser(u.id);
     });
-    container.appendChild(el);
+    allUsersContainer.appendChild(el);
   });
 }
 
-/* ---------- Follow / Unfollow ---------- */
+// Actions
 function followUser(targetId){
   const cur = getCurrentUser();
   if(!cur.following.includes(targetId)){
     cur.following.push(targetId);
-    const target = getUserById(targetId);
-    target.followers = target.followers || [];
-    if(!target.followers.includes(cur.id)) target.followers.push(cur.id);
+    const tgt = getUser(targetId);
+    tgt.followers = tgt.followers || [];
+    if(!tgt.followers.includes(cur.id)) tgt.followers.push(cur.id);
     saveAndRefresh();
-    showToast('Abonné ✔');
+    showToast('Abonné');
   }
 }
 function unfollowUser(targetId){
   const cur = getCurrentUser();
-  cur.following = cur.following.filter(x=>x!==targetId);
-  const target = getUserById(targetId);
-  target.followers = (target.followers||[]).filter(x=>x!==cur.id);
+  cur.following = (cur.following||[]).filter(x=>x!==targetId);
+  const tgt = getUser(targetId);
+  if(tgt) tgt.followers = (tgt.followers||[]).filter(x=>x!==cur.id);
   saveAndRefresh();
   showToast('Désabonné');
 }
 
-/* ---------- Toggle Like ---------- */
 function toggleLike(postId){
   const cur = getCurrentUser();
-  const p = posts.find(x=>x.id===postId);
+  const p = posts.find(pp=>pp.id===postId);
   if(!p) return;
   p.likes = p.likes || [];
-  if(p.likes.includes(cur.id)){
-    p.likes = p.likes.filter(x=>x!==cur.id);
-  } else {
-    p.likes.push(cur.id);
-  }
+  if(p.likes.includes(cur.id)) p.likes = p.likes.filter(x=>x!==cur.id);
+  else p.likes.push(cur.id);
   saveAndRefresh();
 }
 
-/* ---------- Add comment ---------- */
 function addComment(postId, text){
-  const p = posts.find(x=>x.id===postId);
+  const p = posts.find(pp=>pp.id===postId);
   if(!p) return;
   p.comments = p.comments || [];
-  p.comments.push({ userId: currentUserId, text: text, date: now() });
+  p.comments.push({ userId: currentUserId, text, date: nowISO() });
   saveAndRefresh();
 }
 
-/* ---------- Add reaction (emoji) ---------- */
 function addReaction(postId, emoji){
   addComment(postId, emoji);
   showToast('Réaction ajoutée');
 }
 
-/* ---------- Create post ---------- */
+// Post creation
 function handlePost(){
-  const text = composerText.value.trim();
-  const category = composerCategory.value.trim();
-  if(!text){
-    alert('Écris une expérience avant de publier.');
-    return;
-  }
-  const image = composerImage.dataset && composerImage.dataset.preview ? composerImage.dataset.preview : null;
-  const newPost = { id: 'p'+uid(), userId: currentUserId, text, category, date: now(), image, likes: [], comments: [] };
+  const text = (composerText && composerText.value || '').trim();
+  const category = (composerCategory && composerCategory.value || '').trim();
+  if(!text) { alert('Écris une expérience avant de publier.'); return; }
+  const image = composerImage && composerImage.dataset && composerImage.dataset.preview ? composerImage.dataset.preview : null;
+  const newPost = { id: 'p'+uid(), userId: currentUserId, text, category, date: nowISO(), image, likes: [], comments: [] };
   posts.unshift(newPost);
   composerText.value = '';
   composerCategory.value = '';
-  delete composerImage.dataset.preview;
-  composerImage.value = '';
+  if(composerImage) { delete composerImage.dataset.preview; composerImage.value = ''; }
   saveAndRefresh();
   showToast('Post publié');
 }
 
-/* ---------- Composer image preview ---------- */
 function handleComposerImage(e){
   const f = composerImage.files && composerImage.files[0];
   if(!f) return;
@@ -467,7 +425,7 @@ function handleComposerImage(e){
   r.readAsDataURL(f);
 }
 
-/* ---------- Avatar upload ---------- */
+// Avatar upload
 function handleAvatarUpload(e){
   const f = e.target.files && e.target.files[0];
   if(!f) return;
@@ -481,31 +439,31 @@ function handleAvatarUpload(e){
   r.readAsDataURL(f);
 }
 
-/* ---------- Profile edit ---------- */
+// Profile edit
 function saveProfileChanges(){
-  const name = inputName.value.trim();
-  const email = inputEmail.value.trim();
-  const bio = inputBio.value.trim();
   const cur = getCurrentUser();
-  if(name) cur.name = name;
-  if(email) cur.email = email;
-  cur.bio = bio;
+  if(inputName && inputName.value.trim()) cur.name = inputName.value.trim();
+  if(inputEmail && inputEmail.value.trim()) cur.email = inputEmail.value.trim();
+  if(inputBio) cur.bio = inputBio.value.trim();
   saveAndRefresh();
-  profileEdit.classList.add('hidden');
+  if(profileEdit) profileEdit.classList.add('hidden');
   showToast('Profil enregistré');
 }
 
-/* ---------- Open user profile modal ---------- */
+// Modal / Search
+function openModal(){ modal.classList.remove('hidden'); modal.setAttribute('aria-hidden','false'); }
+function closeModal(){ modal.classList.add('hidden'); modalContent.innerHTML = ''; modal.setAttribute('aria-hidden','true'); }
+
 function openUserProfileModal(userid){
-  const u = getUserById(userid);
+  const u = getUser(userid);
   if(!u) return;
   modalContent.innerHTML = `
     <div style="display:flex;gap:12px;align-items:center">
-      <img src="${u.avatar}" style="width:72px;height:72px;border-radius:12px">
-      <div><h3>${escapeHtml(u.name)}</h3><div class="small muted">${escapeHtml(u.bio||'')}</div></div>
+      <img src="${u.avatar || defaultAvatar()}" style="width:72px;height:72px;border-radius:12px">
+      <div><h3>${escapeHTML(u.name||'—')}</h3><div class="small muted">${escapeHTML(u.bio||'')}</div></div>
     </div>
     <hr>
-    <div id="userPostsModal"><h4>Posts de ${escapeHtml(u.name)}</h4></div>
+    <div id="userPostsModal"><h4>Posts de ${escapeHTML(u.name||'—')}</h4></div>
     <div style="margin-top:10px"><button id="followBtn" class="btn small">${ getCurrentUser().following.includes(u.id) ? 'Abonné' : 'Suivre' }</button></div>
   `;
   const up = posts.filter(p=>p.userId===u.id).sort((a,b)=>new Date(b.date)-new Date(a.date));
@@ -513,7 +471,7 @@ function openUserProfileModal(userid){
   up.forEach(p=>{
     const d = document.createElement('div');
     d.className = 'post-card';
-    d.innerHTML = `<div><strong>${p.category||'aucune'}</strong> • ${formatDate(p.date)}</div><div>${escapeHtml(p.text)}</div>`;
+    d.innerHTML = `<div><strong>${p.category||'aucune'}</strong> • ${fmt(p.date)}</div><div>${escapeHTML(p.text)}</div>`;
     upEl.appendChild(d);
   });
   $('#followBtn').addEventListener('click', ()=>{
@@ -523,18 +481,17 @@ function openUserProfileModal(userid){
   openModal();
 }
 
-/* ---------- List modal (followers/following) ---------- */
 function openListModal(which){
   const cur = getCurrentUser();
-  let list = which === 'following' ? (cur.following || []) : (cur.followers || []);
+  const list = which === 'following' ? (cur.following||[]) : (cur.followers||[]);
   modalContent.innerHTML = `<h3>${which === 'following' ? 'Abonnements' : 'Abonnés'}</h3><div id="listModalContent"></div>`;
   const container = $('#listModalContent');
-  list.forEach(id=>{
-    const u = getUserById(id);
+  list.forEach(id => {
+    const u = getUser(id);
     if(!u) return;
     const el = document.createElement('div');
     el.className = 'user-card';
-    el.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><img src="${u.avatar}" style="width:44px;height:44px;border-radius:8px"><div><strong>${u.name}</strong><div class="small muted">${u.bio||''}</div></div></div>
+    el.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><img src="${u.avatar || defaultAvatar()}" style="width:44px;height:44px;border-radius:8px"><div><strong>${u.name}</strong><div class="small muted">${u.bio||''}</div></div></div>
       <div><button class="btn small" data-id="${u.id}">Voir</button></div>`;
     el.querySelector('button').addEventListener('click', ()=> openUserProfileModal(u.id));
     container.appendChild(el);
@@ -542,7 +499,6 @@ function openListModal(which){
   openModal();
 }
 
-/* ---------- Search chooser & modal ---------- */
 function openSearchChooser(){
   modalContent.innerHTML = `
     <h3>Rechercher</h3>
@@ -551,8 +507,8 @@ function openSearchChooser(){
       <button id="searchByExperience" class="btn btn-ghost">Expérience</button>
     </div>
   `;
-  $('#searchByProfile').addEventListener('click', ()=> openSearchModal({ mode:'profile' }));
-  $('#searchByExperience').addEventListener('click', ()=> openSearchModal({ mode:'experience' }));
+  $('#searchByProfile').addEventListener('click', ()=> openSearchModal({mode:'profile'}));
+  $('#searchByExperience').addEventListener('click', ()=> openSearchModal({mode:'experience'}));
   openModal();
 }
 
@@ -566,7 +522,7 @@ function openSearchModal(opts={}){
       <div id="srchResults" style="margin-top:12px"></div>`;
     $('#srchBtn').addEventListener('click', ()=> {
       const q = $('#srchInput').value.trim().toLowerCase();
-      const res = users.filter(u => u.name.toLowerCase().includes(q));
+      const res = users.filter(u => (u.name || '').toLowerCase().includes(q));
       renderSearchProfiles(res);
     });
   } else {
@@ -593,164 +549,48 @@ function renderSearchProfiles(list){
   list.forEach(u=>{
     const el = document.createElement('div');
     el.className = 'user-card';
-    el.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><img src="${u.avatar}" style="width:44px;height:44px;border-radius:8px"><div><strong>${u.name}</strong><div class="small muted">${u.bio||''}</div></div></div>
+    el.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><img src="${u.avatar || defaultAvatar()}" style="width:44px;height:44px;border-radius:8px"><div><strong>${u.name}</strong><div class="small muted">${u.bio||''}</div></div></div>
       <div><button class="btn small" data-id="${u.id}">Voir</button></div>`;
     el.querySelector('button').addEventListener('click', ()=> openUserProfileModal(u.id));
     out.appendChild(el);
   });
 }
-
 function renderSearchExperiences(list){
   const out = $('#srchResultsExp');
   out.innerHTML = '';
   if(!list.length){ out.innerHTML = '<div class="muted">Aucune note d\'expérience partagée pour cette recherche.</div>'; return; }
   list.forEach(p=>{
-    const u = getUserById(p.userId);
+    const u = getUser(p.userId);
     const el = document.createElement('div');
     el.className = 'post-card';
-    el.innerHTML = `<div style="display:flex;gap:10px;align-items:center"><img src="${u.avatar}" style="width:44px;height:44px;border-radius:8px"><div><strong>${u.name}</strong><div class="small muted">${formatDate(p.date)} • ${p.category || ''}</div></div></div><div style="margin-top:8px">${escapeHtml(p.text)}</div>`;
+    el.innerHTML = `<div style="display:flex;gap:10px;align-items:center"><img src="${u.avatar || defaultAvatar()}" style="width:44px;height:44px;border-radius:8px"><div><strong>${u.name}</strong><div class="small muted">${fmt(p.date)} • ${p.category || ''}</div></div></div><div style="margin-top:8px">${escapeHTML(p.text)}</div>`;
     out.appendChild(el);
   });
 }
 
-/* ---------- Modal ---------- */
-function openModal(){ modal.classList.remove('hidden'); }
-function closeModal(){ modal.classList.add('hidden'); modalContent.innerHTML = ''; }
-
-/* ---------- Render profile lists ---------- */
-function renderAllUsersInProfile(){
-  renderAllUsers();
-  if(!followingList || !followersList) return;
-  const cur = getCurrentUser();
-  followingList.innerHTML = '';
-  (cur.following || []).forEach(fid=>{
-    const u = getUserById(fid);
-    if(!u) return;
-    const div = document.createElement('div');
-    div.className = 'user-card';
-    div.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><img src="${u.avatar}" style="width:40px;height:40px;border-radius:8px"><div><strong>${u.name}</strong><div class="small muted">${u.bio||''}</div></div></div>
-      <div><button class="btn-ghost small" data-id="${u.id}">Se désabonner</button></div>`;
-    div.querySelector('button').addEventListener('click', ()=> unfollowUser(u.id));
-    followingList.appendChild(div);
-  });
-
-  followersList.innerHTML = '';
-  (cur.followers || []).forEach(fid=>{
-    const u = getUserById(fid);
-    if(!u) return;
-    const div = document.createElement('div');
-    div.className = 'user-card';
-    div.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><img src="${u.avatar}" style="width:40px;height:40px;border-radius:8px"><div><strong>${u.name}</strong><div class="small muted">${u.bio||''}</div></div></div>
-      <div><button class="btn-ghost small" data-id="${u.id}">Voir</button></div>`;
-    div.querySelector('button').addEventListener('click', ()=> openUserProfileModal(u.id));
-    followersList.appendChild(div);
-  });
-}
-
-/* ---------- All users in sidebar/profile area ---------- */
-function renderAllUsers(){
-  const container = allUsersContainer;
-  if(!container) return;
-  container.innerHTML = '';
-  users.forEach(u=>{
-    const cur = getCurrentUser();
-    if(u.id === cur.id) return;
-    const el = document.createElement('div');
-    el.className = 'user-card';
-    el.innerHTML = `<div style="display:flex;align-items:center"><img src="${u.avatar}" style="width:40px;height:40px;border-radius:8px;margin-right:10px"><div><strong>${u.name}</strong><div class="small muted">${u.bio||''}</div></div></div>
-      <div><button class="btn ${cur.following.includes(u.id)? 'btn-ghost' : ''}" data-id="${u.id}">${cur.following.includes(u.id)? 'Abonné' : 'Suivre'}</button></div>`;
-    const btn = el.querySelector('button');
-    btn.addEventListener('click', ()=> {
-      if(cur.following.includes(u.id)) unfollowUser(u.id);
-      else followUser(u.id);
-    });
-    container.appendChild(el);
-  });
-}
-
-/* ---------- Save and refresh helper ---------- */
+// Save & refresh
 function saveAndRefresh(){
   saveAll();
   renderAll();
 }
 
-/* ---------- Small helpers ---------- */
-function defaultAvatar(){ return 'https://i.pravatar.cc/120?img=1'; }
+// Toast
 function showToast(text, ms=1600){
-  const t = document.querySelector('.toast');
-  if(!t) return;
-  t.textContent = text;
-  t.classList.add('show');
-  setTimeout(()=> t.classList.remove('show'), ms);
+  if(!toastEl) return;
+  toastEl.textContent = text;
+  toastEl.classList.add('show');
+  setTimeout(()=> toastEl.classList.remove('show'), ms);
 }
 
-/* ---------- Switch user quick (simulate logout) ---------- */
+// Quick user switch (simulate another local account if created manually)
 function switchUserQuick(){
   const other = users.find(u => u.id !== currentUserId);
   if(other){ currentUserId = other.id; localStorage.setItem(K_CURRENT, currentUserId); showToast('Utilisateur changé (simulé)'); renderAll(); }
 }
 
-/* ---------- Save profile changes ---------- */
-function saveProfileChanges(){
-  const name = inputName.value.trim();
-  const email = inputEmail.value.trim();
-  const bio = inputBio.value.trim();
+// Init small (ensure DOM exists)
+(function initSmall(){
   const cur = getCurrentUser();
-  if(name) cur.name = name;
-  if(email) cur.email = email;
-  cur.bio = bio;
-  saveAndRefresh();
-  profileEdit.classList.add('hidden');
-  showToast('Profil enregistré');
-}
-
-/* ---------- Avatar upload handler ---------- */
-function handleAvatarUpload(e){
-  const f = e.target.files && e.target.files[0];
-  if(!f) return;
-  const r = new FileReader();
-  r.onload = ev => {
-    const cur = getCurrentUser();
-    cur.avatar = ev.target.result;
-    saveAndRefresh();
-    showToast('Avatar mis à jour');
-  };
-  r.readAsDataURL(f);
-}
-
-/* ---------- Render lists and stats on profile page (user's posts) ---------- */
-function renderUserPosts(){
-  const el = profilePostsEl;
-  if(!el) return;
-  el.innerHTML = '';
-  const myPosts = posts.filter(p => p.userId === currentUserId).sort((a,b)=>new Date(b.date)-new Date(a.date));
-  myPosts.forEach(p=>{
-    const li = document.createElement('li');
-    li.className = 'post-card';
-    li.innerHTML = `<div><strong>${p.category || 'aucune'}</strong> • ${formatDate(p.date)}</div><div>${escapeHtml(p.text)}</div>
-      <div style="margin-top:8px"><button class="btn-ghost small" data-id="${p.id}">Supprimer</button></div>`;
-    li.querySelector('button') && li.querySelector('button').addEventListener('click', ()=> {
-      if(confirm('Supprimer ce post ?')) {
-        posts = posts.filter(x=>x.id!==p.id);
-        saveAndRefresh();
-        showToast('Post supprimé');
-      }
-    });
-    el.appendChild(li);
-  });
-}
-
-/* ---------- Open/close modal helpers ---------- */
-function openModal(){ modal.classList.remove('hidden'); }
-function closeModal(){ modal.classList.add('hidden'); modalContent.innerHTML = ''; }
-
-/* ---------- Open user quick (global window) ---------- */
-window.openUserProfile = openUserProfileModal;
-window.openSearch = openSearchChooser;
-
-/* ---------- Init final render ---------- */
-function initUIDefaults(){
-  // ensure DOM elements exist (some pages won't have all elements)
-  if($('#miniAvatar')) $('#miniAvatar').src = getCurrentUser().avatar || defaultAvatar();
-}
-initUIDefaults();
+  if(miniAvatar) miniAvatar.src = cur.avatar || defaultAvatar();
+  if(miniAvatar2) miniAvatar2.src = cur.avatar || defaultAvatar();
+})();
