@@ -7,11 +7,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body data-page="profile">
   <div class="app">
+    <!-- HEADER -->
     <header class="topbar">
       <div class="left">
-        <button id="hamburger2" class="icon-btn">☰</button>
+        <button id="hamburger2" class="icon-btn" aria-label="Menu">☰</button>
         <div class="brand-name">MemoVibe</div>
       </div>
       <div class="center">
@@ -20,7 +21,9 @@
       <div class="right">
         <button id="refreshBtn2" class="icon-btn">⭮</button>
         <a href="index.html" class="profile-link" title="Accueil">🏠</a>
-        <a href="profile.html" class="profile-link"><img id="miniAvatar2" class="mini-avatar" src="" alt="avatar"></a>
+        <a href="profile.html" class="profile-link">
+          <img id="miniAvatar2" class="mini-avatar" src="" alt="Avatar utilisateur">
+        </a>
       </div>
     </header>
 
@@ -28,7 +31,7 @@
       <section class="profile-left">
         <div class="card profile-card-large">
           <div class="profile-top">
-            <img id="profileAvatar" class="avatar-xl" src="" alt="avatar">
+            <img id="profileAvatar" class="avatar-xl" src="" alt="Avatar utilisateur">
             <div class="profile-info">
               <h2 id="profileName">—</h2>
               <p id="profileBio" class="muted">Ta bio ici</p>
@@ -67,7 +70,6 @@
           <h4>Abonnements</h4>
           <div id="followingList"></div>
         </div>
-
         <div class="card">
           <h4>Abonnés</h4>
           <div id="followersList"></div>
@@ -79,13 +81,15 @@
       <small>© 2025 MemoVibe</small>
     </footer>
 
+    <!-- MODAL -->
     <div id="modal" class="modal hidden" role="dialog" aria-hidden="true">
       <div class="modal-card">
-        <button id="modalClose" class="modal-close">✕</button>
+        <button id="modalClose" class="modal-close" aria-label="Fermer">✕</button>
         <div id="modalContent"></div>
       </div>
     </div>
 
+    <!-- TOAST -->
     <div class="toast" id="toastProfile" aria-hidden="true"></div>
   </div>
 
