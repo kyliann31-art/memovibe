@@ -12,10 +12,7 @@
     <header class="topbar">
       <div class="left">
         <button id="hamburger" class="icon-btn" aria-label="Menu">☰</button>
-        <div class="brand" title="MemoVibe">
-          <div class="brand-logo">📝</div>
-          <div class="brand-name">MemoVibe</div>
-        </div>
+        <div class="brand-name">MemoVibe</div>
       </div>
 
       <div class="center">
@@ -30,21 +27,35 @@
     </header>
 
     <main class="main">
+      <!-- SIDEBAR MENU (toggle via hamburger) -->
+      <aside id="sideMenu" class="side-menu hidden">
+        <div class="menu-inner">
+          <button id="closeMenu" class="icon-btn close-menu">✕</button>
+          <nav class="menu-nav">
+            <a href="index.html" class="menu-link active">Accueil</a>
+            <a href="profile.html" class="menu-link">Profil</a>
+            <a href="#" id="menuNotifications" class="menu-link">Notifications</a>
+            <a href="#" id="menuSettings" class="menu-link">Paramètres</a>
+          </nav>
+          <div class="menu-footer small muted">MemoVibe — carnet social</div>
+        </div>
+      </aside>
+
       <aside class="sidebar">
-        <nav class="nav">
-          <button class="nav-btn" data-feed="friends">Abonnements</button>
+        <nav class="nav card">
+          <button class="nav-btn active" data-feed="friends">Abonnements</button>
           <button class="nav-btn" data-feed="all">Général</button>
           <button class="nav-btn" data-feed="me">Mes posts</button>
         </nav>
 
         <section class="cats card">
           <h4>Catégories</h4>
-          <div id="categoriesList"></div>
+          <div id="categoriesList" class="categories"></div>
         </section>
 
         <section class="help card">
           <h4>Astuce</h4>
-          <p>Clique sur une expérience pour voir le profil de l’auteur, liker, commenter ou réagir avec un emoji.</p>
+          <p>Clique sur une expérience pour voir le profil de l’auteur, liker, commenter ou réagir.</p>
         </section>
       </aside>
 
@@ -52,7 +63,7 @@
         <div class="composer card">
           <div class="composer-top">
             <img id="composerAvatar" class="avatar-md" src="" alt="avatar">
-            <select id="composerCategory" class="select-cat">
+            <select id="composerCategory" class="select-cat" title="Catégorie">
               <option value="">Choisir une catégorie</option>
               <option value="travail">Travail</option>
               <option value="études">Études</option>
@@ -65,7 +76,7 @@
           <textarea id="composerText" placeholder="Partager une expérience..." rows="3"></textarea>
           <div class="composer-actions">
             <div class="left">
-              <label class="file-label">📎 <input id="composerImage" type="file" accept="image/*" hidden></label>
+              <label class="file-label">📎<input id="composerImage" type="file" accept="image/*" hidden></label>
             </div>
             <div class="right">
               <button id="postBtn" class="btn">Publier</button>
@@ -84,8 +95,8 @@
         <div class="card profile-mini">
           <img id="sidebarAvatar" class="avatar-lg" src="" alt="avatar">
           <div class="profile-mini-info">
-            <div id="sidebarName" class="bold"></div>
-            <div id="sidebarBio" class="muted small"></div>
+            <div id="sidebarName" class="bold">—</div>
+            <div id="sidebarBio" class="muted small">—</div>
             <div class="stats">
               <div><strong id="statPosts">0</strong><div class="small">Posts</div></div>
               <div><strong id="statFollowing">0</strong><div class="small">Abonnements</div></div>
@@ -110,7 +121,7 @@
     </footer>
   </div>
 
-  <!-- Modals -->
+  <!-- Modal -->
   <div id="modal" class="modal hidden">
     <div class="modal-card">
       <button id="modalClose" class="modal-close">✕</button>
