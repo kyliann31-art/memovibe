@@ -19,7 +19,7 @@
       </div>
       <div class="right">
         <button id="refreshBtn2" class="icon-btn">⭮</button>
-        <button id="themeToggle2" class="icon-btn">🌙</button>
+        <a href="index.html" class="profile-link" title="Accueil">🏠</a>
         <a href="profile.html" class="profile-link"><img id="miniAvatar2" class="mini-avatar" src="" alt="avatar"></a>
       </div>
     </header>
@@ -50,7 +50,7 @@
             <input id="inputName" placeholder="Nom">
             <input id="inputEmail" placeholder="Email">
             <textarea id="inputBio" placeholder="Bio (ex : études, travail...)" rows="3"></textarea>
-            <div class="right" style="margin-top:8px;">
+            <div style="display:flex;justify-content:flex-end;margin-top:8px">
               <button id="saveProfile" class="btn">Enregistrer</button>
             </div>
           </div>
@@ -81,7 +81,7 @@
 
     <div id="modal" class="modal hidden" role="dialog" aria-hidden="true">
       <div class="modal-card">
-        <button id="modalClose" class="modal-close" aria-label="Fermer">✕</button>
+        <button id="modalClose" class="modal-close">✕</button>
         <div id="modalContent"></div>
       </div>
     </div>
