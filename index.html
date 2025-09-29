@@ -1,48 +1,123 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MemoVibe - Fil d’actualité</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MemoVibe — Accueil</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="container">
+  <div class="app">
+    <header class="topbar">
+      <div class="left">
+        <button id="hamburger" class="icon-btn" aria-label="Menu">☰</button>
+        <div class="brand" title="MemoVibe">
+          <div class="brand-logo">📝</div>
+          <div class="brand-name">MemoVibe</div>
+        </div>
+      </div>
 
-<header>
-  <h1>MemoVibe</h1>
-  <nav>
-    <a href="index.html" class="active">Fil d’actualité</a>
-    <a href="profile.html">Profil</a>
-    <button id="toggleTheme" class="btn-small">🌙</button>
-  </nav>
-</header>
+      <div class="center">
+        <input id="searchBar" class="search" placeholder="Rechercher (profil / expérience) — appuyez pour choisir..." readonly>
+      </div>
 
-<main>
-  <section class="feed-controls">
-    <button class="btn-small" id="feed-general">Général</button>
-    <button class="btn-small" id="feed-friends">Abonnements</button>
-    <button class="btn-small" id="feed-personal">Mes posts</button>
-  </section>
+      <div class="right">
+        <button id="refreshBtn" class="icon-btn" title="Rafraîchir">⭮</button>
+        <button id="themeToggle" class="icon-btn" title="Thème">🌙</button>
+        <a href="profile.html" class="profile-link" title="Profil"><img id="miniAvatar" class="mini-avatar" src="" alt="avatar"></a>
+      </div>
+    </header>
 
-  <section class="post-section">
-    <h2>Ajouter un post</h2>
-    <form id="postForm">
-      <textarea id="postInput" placeholder="Quoi de neuf ?" required></textarea>
-      <button type="submit" class="btn">Publier</button>
-    </form>
+    <main class="main">
+      <aside class="sidebar">
+        <nav class="nav">
+          <button class="nav-btn" data-feed="friends">Abonnements</button>
+          <button class="nav-btn" data-feed="all">Général</button>
+          <button class="nav-btn" data-feed="me">Mes posts</button>
+        </nav>
 
-    <div id="feed"></div>
-  </section>
-</main>
+        <section class="cats card">
+          <h4>Catégories</h4>
+          <div id="categoriesList"></div>
+        </section>
 
-<div id="toast" class="toast"></div>
+        <section class="help card">
+          <h4>Astuce</h4>
+          <p>Clique sur une expérience pour voir le profil de l’auteur, liker, commenter ou réagir avec un emoji.</p>
+        </section>
+      </aside>
 
-<footer>
-  <p>&copy; 2025 MemoVibe</p>
-</footer>
+      <section class="feed">
+        <div class="composer card">
+          <div class="composer-top">
+            <img id="composerAvatar" class="avatar-md" src="" alt="avatar">
+            <select id="composerCategory" class="select-cat">
+              <option value="">Choisir une catégorie</option>
+              <option value="travail">Travail</option>
+              <option value="études">Études</option>
+              <option value="voyage">Voyage</option>
+              <option value="santé">Santé</option>
+              <option value="perso">Personnel</option>
+              <option value="autre">Autre</option>
+            </select>
+          </div>
+          <textarea id="composerText" placeholder="Partager une expérience..." rows="3"></textarea>
+          <div class="composer-actions">
+            <div class="left">
+              <label class="file-label">📎 <input id="composerImage" type="file" accept="image/*" hidden></label>
+            </div>
+            <div class="right">
+              <button id="postBtn" class="btn">Publier</button>
+            </div>
+          </div>
+        </div>
 
-<script src="script.js"></script>
-</div>
+        <div class="feed-controls">
+          <div class="feed-title"><strong id="feedTitle">Abonnements</strong></div>
+        </div>
+
+        <ul id="postsList" class="posts-list"></ul>
+      </section>
+
+      <aside class="rightcol">
+        <div class="card profile-mini">
+          <img id="sidebarAvatar" class="avatar-lg" src="" alt="avatar">
+          <div class="profile-mini-info">
+            <div id="sidebarName" class="bold"></div>
+            <div id="sidebarBio" class="muted small"></div>
+            <div class="stats">
+              <div><strong id="statPosts">0</strong><div class="small">Posts</div></div>
+              <div><strong id="statFollowing">0</strong><div class="small">Abonnements</div></div>
+              <div><strong id="statFollowers">0</strong><div class="small">Abonnés</div></div>
+            </div>
+            <div class="mini-actions">
+              <button id="manageFollowing" class="btn-ghost small">Voir abonnements</button>
+              <button id="manageFollowers" class="btn-ghost small">Voir abonnés</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card recent">
+          <h4>Récents</h4>
+          <ul id="recentList" class="recent-list"></ul>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <small>© 2025 MemoVibe</small>
+    </footer>
+  </div>
+
+  <!-- Modals -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-card">
+      <button id="modalClose" class="modal-close">✕</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
