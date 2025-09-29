@@ -9,13 +9,14 @@
 </head>
 <body>
   <div class="app">
+    <!-- Topbar -->
     <header class="topbar">
       <div class="left">
         <button id="hamburger" class="icon-btn" aria-label="Menu">☰</button>
         <div class="brand-name">MemoVibe</div>
       </div>
       <div class="center">
-        <input id="searchBar" class="search" placeholder="Rechercher (profil / expérience) — cliquez pour choisir..." readonly>
+        <input id="searchBar" class="search" placeholder="Rechercher..." readonly>
       </div>
       <div class="right">
         <button id="refreshBtn" class="icon-btn" title="Rafraîchir">⭮</button>
@@ -23,6 +24,7 @@
       </div>
     </header>
 
+    <!-- Main -->
     <main class="main">
       <!-- Side menu -->
       <aside id="sideMenu" class="side-menu hidden" aria-hidden="true">
@@ -32,19 +34,18 @@
             <a href="index.html" class="menu-link active">Accueil</a>
             <a href="profile.html" class="menu-link">Profil</a>
             <button id="menuCreateAccount" class="menu-link btn-ghost">Créer un autre profil</button>
-            <button id="menuSettings" class="menu-link btn-ghost">Paramètres</button>
             <button id="menuReset" class="menu-link btn-ghost">Réinitialiser les données</button>
           </nav>
           <div class="menu-footer small muted">MemoVibe — carnet d'expériences</div>
         </div>
       </aside>
 
-      <!-- Left sidebar -->
+      <!-- Left Sidebar -->
       <aside class="sidebar">
         <nav class="nav card">
-          <button class="nav-btn active" data-feed="friends">Abonnements</button>
-          <button class="nav-btn" data-feed="all">Général</button>
-          <button class="nav-btn" data-feed="mine">Mes expériences</button>
+          <button class="nav-btn active" data-feed="friends" id="feedFriends">Abonnements</button>
+          <button class="nav-btn" data-feed="all" id="feedGeneral">Général</button>
+          <button class="nav-btn" data-feed="mine" id="feedMine">Mes expériences</button>
         </nav>
 
         <section class="cats card">
@@ -54,12 +55,18 @@
 
         <section class="help card">
           <h4>Astuce</h4>
-          <p>Clique sur une expérience pour voir le profil de l’auteur, liker, commenter, réagir ou proposer un défi.</p>
+          <p>Clique sur une expérience pour voir le profil de l’auteur, liker, commenter ou réagir (emoji ajouté comme commentaire).</p>
+        </section>
+
+        <section class="card">
+          <h4>Notifications</h4>
+          <div id="notifications" class="notifications"></div>
         </section>
       </aside>
 
       <!-- Feed -->
-      <section class="feed">
+      <section class="feed" id="feed">
+        <!-- Composer -->
         <div class="composer card" id="composerCard" aria-live="polite">
           <div class="composer-top">
             <img id="composerAvatar" class="avatar-md" src="default-avatar.png" alt="avatar">
@@ -86,11 +93,9 @@
             </div>
           </div>
         </div>
-
-        <ul id="postsList" class="posts-list" aria-live="polite"></ul>
       </section>
 
-      <!-- Right column -->
+      <!-- Right Column -->
       <aside class="rightcol">
         <div class="card profile-mini">
           <img id="sidebarAvatar" class="avatar-lg" src="default-avatar.png" alt="avatar">
@@ -101,10 +106,7 @@
               <div><strong id="statPosts">0</strong><div class="small">Posts</div></div>
               <div><strong id="statFollowing">0</strong><div class="small">Abonnements</div></div>
               <div><strong id="statFollowers">0</strong><div class="small">Abonnés</div></div>
-            </div>
-            <div class="mini-actions">
-              <button id="manageFollowing" class="btn-ghost small">Voir abonnements</button>
-              <button id="manageFollowers" class="btn-ghost small">Voir abonnés</button>
+              <div><strong id="statPoints">0</strong><div class="small">Points</div></div>
             </div>
           </div>
         </div>
@@ -114,33 +116,27 @@
     <footer class="footer">
       <small>© 2025 MemoVibe</small>
     </footer>
-
-    <div id="modal" class="modal hidden" role="dialog" aria-hidden="true">
-      <div class="modal-card">
-        <button id="modalClose" class="modal-close" aria-label="Fermer">✕</button>
-        <div id="modalContent"></div>
-      </div>
-    </div>
-
-    <div id="createProfileOverlay" class="overlay hidden" role="dialog" aria-hidden="true">
-      <div class="overlay-card">
-        <h2>Créer votre profil</h2>
-        <input id="cp_name" placeholder="Nom d'utilisateur" />
-        <input id="cp_email" placeholder="Email (optionnel)" />
-        <textarea id="cp_bio" placeholder="Courte biographie (optionnel)" rows="3"></textarea>
-        <div style="display:flex;gap:8px;align-items:center">
-          <label class="upload-btn">Profil <input id="cp_avatar" type="file" accept="image/*" hidden></label>
-          <span id="cpAvatarName" class="small muted"></span>
-        </div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
-          <button id="cpSkip" class="btn-ghost">Passer</button>
-          <button id="cpCreate" class="btn">Créer le profil</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="toast" id="toast" aria-hidden="true"></div>
   </div>
+
+  <!-- Overlay Create Profile -->
+  <div id="createProfileOverlay" class="overlay hidden" role="dialog" aria-hidden="true">
+    <div class="overlay-card">
+      <h2>Créer votre profil</h2>
+      <input id="cp_name" placeholder="Nom d'utilisateur" />
+      <input id="cp_email" placeholder="Email (optionnel)" />
+      <textarea id="cp_bio" placeholder="Courte biographie (optionnel)" rows="3"></textarea>
+      <div style="display:flex;gap:8px;align-items:center">
+        <label class="upload-btn">Choisir avatar <input id="cp_avatar" type="file" accept="image/*" hidden></label>
+        <span id="cpAvatarName" class="small muted"></span>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+        <button id="cpSkip" class="btn-ghost">Passer</button>
+        <button id="cpCreate" class="btn">Créer le profil</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" aria-hidden="true"></div>
 
   <script src="script.js"></script>
 </body>
