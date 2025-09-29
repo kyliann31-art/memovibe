@@ -9,25 +9,22 @@
 </head>
 <body>
   <div class="app">
-    <!-- Header -->
     <header class="topbar">
       <div class="left">
-        <button id="hamburger2" class="icon-btn" aria-label="Menu">☰</button>
+        <button id="hamburger2" class="icon-btn">☰</button>
         <div class="brand-name">MemoVibe</div>
       </div>
       <div class="center">
         <input id="searchBarProfile" class="search" placeholder="Rechercher..." readonly>
       </div>
       <div class="right">
-        <button id="refreshBtn2" class="icon-btn" title="Rafraîchir">⭮</button>
+        <button id="refreshBtn2" class="icon-btn">⭮</button>
         <a href="index.html" class="profile-link" title="Accueil">🏠</a>
         <a href="profile.html" class="profile-link"><img id="miniAvatar2" class="mini-avatar" src="default-avatar.png" alt="avatar"></a>
       </div>
     </header>
 
-    <!-- Main -->
     <main class="main profile-main">
-      <!-- Left column -->
       <section class="profile-left">
         <div class="card profile-card-large">
           <div class="profile-top">
@@ -41,16 +38,15 @@
                 <div><strong id="profileFollowers">0</strong><span>abonnés</span></div>
               </div>
               <div class="profile-actions">
-                <label class="upload-btn">Changer avatar <input id="avatarUpload" type="file" accept="image/*" hidden></label>
+                <a href="profile.html" class="upload-btn">Profil</a>
                 <button id="editProfileBtn" class="btn-ghost">Modifier profil</button>
                 <button id="logoutBtn" class="btn-ghost">Changer utilisateur</button>
               </div>
             </div>
           </div>
 
-          <!-- Edit form -->
           <div class="profile-edit card hidden" id="profileEdit">
-            <h4>Modifier votre profil</h4>
+            <h4>Modifier</h4>
             <input id="inputName" placeholder="Nom">
             <input id="inputEmail" placeholder="Email">
             <textarea id="inputBio" placeholder="Bio (ex : études, travail...)" rows="3"></textarea>
@@ -60,119 +56,39 @@
           </div>
         </div>
 
-        <!-- User Posts -->
         <div class="card user-posts">
           <h3>Mes expériences</h3>
           <ul id="userPosts" class="posts-list"></ul>
         </div>
       </section>
 
-      <!-- Right column -->
       <aside class="profile-right">
         <div class="card">
           <h4>Abonnements</h4>
-          <ul id="followingList"></ul>
+          <div id="followingList"></div>
         </div>
+
         <div class="card">
           <h4>Abonnés</h4>
-          <ul id="followersList"></ul>
+          <div id="followersList"></div>
         </div>
       </aside>
     </main>
 
-    <!-- Footer -->
     <footer class="footer">
       <small>© 2025 MemoVibe</small>
     </footer>
 
-    <!-- Modal -->
     <div id="modal" class="modal hidden" role="dialog" aria-hidden="true">
       <div class="modal-card">
-        <button id="modalClose" class="modal-close" aria-label="Fermer">✕</button>
+        <button id="modalClose" class="modal-close">✕</button>
         <div id="modalContent"></div>
       </div>
     </div>
 
-    <!-- Toast -->
     <div class="toast" id="toastProfile" aria-hidden="true"></div>
   </div>
 
   <script src="script.js"></script>
-  <script>
-    // -------------------------------
-    // Profile page JS spécifique
-    // -------------------------------
-    document.addEventListener("DOMContentLoaded", () => {
-      const editBtn = document.getElementById("editProfileBtn");
-      const editForm = document.getElementById("profileEdit");
-      const saveBtn = document.getElementById("saveProfile");
-      const avatarInput = document.getElementById("avatarUpload");
-      const logoutBtn = document.getElementById("logoutBtn");
-
-      // Toggle edit form
-      editBtn.addEventListener("click", () => {
-        editForm.classList.toggle("hidden");
-        document.getElementById("inputName").value = currentUser.name;
-        document.getElementById("inputEmail").value = currentUser.email;
-        document.getElementById("inputBio").value = currentUser.bio;
-      });
-
-      // Save profile
-      saveBtn.addEventListener("click", () => {
-        const name = document.getElementById("inputName").value.trim();
-        const email = document.getElementById("inputEmail").value.trim();
-        const bio = document.getElementById("inputBio").value.trim();
-        updateProfile(name || currentUser.name, email || currentUser.email, bio, currentUser.photo);
-        editForm.classList.add("hidden");
-      });
-
-      // Avatar upload
-      avatarInput.addEventListener("change", e => {
-        const file = e.target.files[0];
-        if(file){
-          const reader = new FileReader();
-          reader.onload = evt => {
-            updateProfile(currentUser.name, currentUser.email, currentUser.bio, evt.target.result);
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-
-      // Logout / changer utilisateur
-      logoutBtn.addEventListener("click", () => {
-        localStorage.removeItem("memoUser");
-        location.href = "index.html";
-      });
-
-      // Followers / Following lists
-      const followingList = document.getElementById("followingList");
-      const followersList = document.getElementById("followersList");
-
-      function refreshFollowLists(){
-        followingList.innerHTML = "";
-        followersList.innerHTML = "";
-        const following = follows[currentUser.email] || [];
-        following.forEach(email => {
-          let u = users.find(u => u.email === email);
-          if(u){
-            let li = document.createElement("li");
-            li.textContent = u.name;
-            followingList.appendChild(li);
-          }
-        });
-        const followers = Object.entries(follows).filter(([uid, arr]) => arr.includes(currentUser.email)).map(([uid]) => uid);
-        followers.forEach(email => {
-          let u = users.find(u => u.email === email);
-          if(u){
-            let li = document.createElement("li");
-            li.textContent = u.name;
-            followersList.appendChild(li);
-          }
-        });
-      }
-
-      refreshFollowLists();
-    });
-  </script>
 </body>
 </html>
