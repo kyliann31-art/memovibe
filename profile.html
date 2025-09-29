@@ -9,6 +9,7 @@
 </head>
 <body>
   <div class="app">
+    <!-- Topbar -->
     <header class="topbar">
       <div class="left">
         <button id="hamburger2" class="icon-btn">☰</button>
@@ -24,7 +25,9 @@
       </div>
     </header>
 
+    <!-- Main -->
     <main class="main profile-main">
+      <!-- Left section -->
       <section class="profile-left">
         <div class="card profile-card-large">
           <div class="profile-top">
@@ -36,15 +39,16 @@
                 <div><strong id="profilePosts">0</strong><span>posts</span></div>
                 <div><strong id="profileFollowing">0</strong><span>abonnements</span></div>
                 <div><strong id="profileFollowers">0</strong><span>abonnés</span></div>
+                <div><strong id="profilePoints">0</strong><span>points</span></div>
               </div>
               <div class="profile-actions">
-                <a href="profile.html" class="upload-btn">Profil</a>
                 <button id="editProfileBtn" class="btn-ghost">Modifier profil</button>
                 <button id="logoutBtn" class="btn-ghost">Changer utilisateur</button>
               </div>
             </div>
           </div>
 
+          <!-- Edit profile form -->
           <div class="profile-edit card hidden" id="profileEdit">
             <h4>Modifier</h4>
             <input id="inputName" placeholder="Nom">
@@ -56,12 +60,14 @@
           </div>
         </div>
 
+        <!-- User posts -->
         <div class="card user-posts">
           <h3>Mes expériences</h3>
           <ul id="userPosts" class="posts-list"></ul>
         </div>
       </section>
 
+      <!-- Right section -->
       <aside class="profile-right">
         <div class="card">
           <h4>Abonnements</h4>
@@ -72,6 +78,16 @@
           <h4>Abonnés</h4>
           <div id="followersList"></div>
         </div>
+
+        <div class="card">
+          <h4>Notifications</h4>
+          <div id="notificationsProfile"></div>
+        </div>
+
+        <div class="card">
+          <h4>Défis</h4>
+          <ul id="dailyChallenges"></ul>
+        </div>
       </aside>
     </main>
 
@@ -79,6 +95,7 @@
       <small>© 2025 MemoVibe</small>
     </footer>
 
+    <!-- Modal -->
     <div id="modal" class="modal hidden" role="dialog" aria-hidden="true">
       <div class="modal-card">
         <button id="modalClose" class="modal-close">✕</button>
@@ -86,6 +103,7 @@
       </div>
     </div>
 
+    <!-- Toast -->
     <div class="toast" id="toastProfile" aria-hidden="true"></div>
   </div>
 
