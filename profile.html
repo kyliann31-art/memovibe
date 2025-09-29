@@ -79,12 +79,14 @@
       <small>© 2025 MemoVibe</small>
     </footer>
 
-    <div id="modal" class="modal hidden">
+    <div id="modal" class="modal hidden" role="dialog" aria-hidden="true">
       <div class="modal-card">
-        <button id="modalClose" class="modal-close">✕</button>
+        <button id="modalClose" class="modal-close" aria-label="Fermer">✕</button>
         <div id="modalContent"></div>
       </div>
     </div>
+
+    <div class="toast" id="toastProfile" aria-hidden="true"></div>
   </div>
 
   <script src="script.js"></script>
