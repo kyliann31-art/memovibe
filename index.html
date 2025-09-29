@@ -27,8 +27,7 @@
     </header>
 
     <main class="main">
-      <!-- SIDEBAR MENU (toggle via hamburger) -->
-      <aside id="sideMenu" class="side-menu hidden">
+      <aside id="sideMenu" class="side-menu hidden" aria-hidden="true">
         <div class="menu-inner">
           <button id="closeMenu" class="icon-btn close-menu">✕</button>
           <nav class="menu-nav">
@@ -76,7 +75,9 @@
           <textarea id="composerText" placeholder="Partager une expérience..." rows="3"></textarea>
           <div class="composer-actions">
             <div class="left">
-              <label class="file-label">📎<input id="composerImage" type="file" accept="image/*" hidden></label>
+              <label class="file-label" title="Ajouter une image">📎
+                <input id="composerImage" type="file" accept="image/*" hidden>
+              </label>
             </div>
             <div class="right">
               <button id="postBtn" class="btn">Publier</button>
@@ -88,7 +89,7 @@
           <div class="feed-title"><strong id="feedTitle">Abonnements</strong></div>
         </div>
 
-        <ul id="postsList" class="posts-list"></ul>
+        <ul id="postsList" class="posts-list" aria-live="polite"></ul>
       </section>
 
       <aside class="rightcol">
@@ -121,13 +122,14 @@
     </footer>
   </div>
 
-  <!-- Modal -->
-  <div id="modal" class="modal hidden">
+  <div id="modal" class="modal hidden" role="dialog" aria-hidden="true">
     <div class="modal-card">
-      <button id="modalClose" class="modal-close">✕</button>
+      <button id="modalClose" class="modal-close" aria-label="Fermer">✕</button>
       <div id="modalContent"></div>
     </div>
   </div>
+
+  <div class="toast" id="toast" aria-hidden="true"></div>
 
   <script src="script.js"></script>
 </body>
