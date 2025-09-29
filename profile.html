@@ -1,56 +1,93 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Profil - MemoVibe</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MemoVibe — Profil</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="container">
+  <div class="app">
+    <header class="topbar">
+      <div class="left">
+        <button id="hamburger2" class="icon-btn">☰</button>
+        <div class="brand"><div class="brand-logo">📝</div><div class="brand-name">MemoVibe</div></div>
+      </div>
+      <div class="center">
+        <input id="searchBarProfile" class="search" placeholder="Rechercher..." readonly>
+      </div>
+      <div class="right">
+        <button id="refreshBtn2" class="icon-btn">⭮</button>
+        <button id="themeToggle2" class="icon-btn">🌙</button>
+        <a href="profile.html" class="profile-link"><img id="miniAvatar2" class="mini-avatar" src="" alt="avatar"></a>
+      </div>
+    </header>
 
-<header>
-  <h1>MemoVibe</h1>
-  <nav>
-    <a href="index.html">Fil d’actualité</a>
-    <a href="profile.html" class="active">Profil</a>
-    <button id="toggleThemeProfile" class="btn-small">🌙</button>
-  </nav>
-</header>
+    <main class="main profile-main">
+      <section class="profile-left">
+        <div class="card profile-card-large">
+          <div class="profile-top">
+            <img id="profileAvatar" class="avatar-xl" src="" alt="avatar">
+            <div class="profile-info">
+              <h2 id="profileName">—</h2>
+              <p id="profileBio" class="muted">Ta bio ici</p>
+              <div class="profile-stats">
+                <div><strong id="profilePosts">0</strong><span>posts</span></div>
+                <div><strong id="profileFollowing">0</strong><span>abonnements</span></div>
+                <div><strong id="profileFollowers">0</strong><span>abonnés</span></div>
+              </div>
+              <div class="profile-actions">
+                <label class="upload-btn">Changer avatar <input id="avatarUpload" type="file" accept="image/*" hidden></label>
+                <button id="editProfileBtn" class="btn-ghost">Modifier profil</button>
+                <button id="logoutBtn" class="btn-ghost">Déconnexion</button>
+              </div>
+            </div>
+          </div>
 
-<main>
-  <section class="profile-section">
-    <h2>Mon Profil</h2>
-    <div class="profile-card">
-      <img src="avatar.png" alt="Avatar" class="avatar-large" id="profileAvatar">
-      <p><b>Nom :</b> <span id="displayName"></span></p>
-      <p><b>Email :</b> <span id="displayEmail"></span></p>
-      <p><b>Abonnements :</b> <span id="followingCount">0</span></p>
-      <p><b>Abonnés :</b> <span id="followersCount">0</span></p>
-      <input type="file" id="avatarInput" accept="image/*">
+          <div class="profile-edit card hidden" id="profileEdit">
+            <h4>Modifier</h4>
+            <input id="inputName" placeholder="Nom">
+            <input id="inputEmail" placeholder="Email">
+            <textarea id="inputBio" placeholder="Bio (ex : études, travail...)" rows="3"></textarea>
+            <div class="right" style="margin-top:8px;">
+              <button id="saveProfile" class="btn">Enregistrer</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card user-posts">
+          <h3>Mes expériences</h3>
+          <ul id="userPosts"></ul>
+        </div>
+      </section>
+
+      <aside class="profile-right">
+        <div class="card">
+          <h4>Abonnements</h4>
+          <div id="followingList"></div>
+        </div>
+
+        <div class="card">
+          <h4>Abonnés</h4>
+          <div id="followersList"></div>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <small>© 2025 MemoVibe</small>
+    </footer>
+
+    <div id="modal" class="modal hidden">
+      <div class="modal-card">
+        <button id="modalClose" class="modal-close">✕</button>
+        <div id="modalContent"></div>
+      </div>
     </div>
 
-    <h3>Modifier mes infos</h3>
-    <form id="profileForm">
-      <input type="text" id="name" placeholder="Nom" required>
-      <input type="email" id="email" placeholder="Email" required>
-      <button type="submit" class="btn">Enregistrer</button>
-    </form>
+  </div>
 
-    <h3>Abonnements</h3>
-    <div id="allUsers"></div>
-    
-    <div id="message"></div>
-  </section>
-</main>
-
-<div id="toast" class="toast"></div>
-
-<footer>
-  <p>&copy; 2025 MemoVibe</p>
-</footer>
-
-<script src="script.js"></script>
-</div>
+  <script src="script.js"></script>
 </body>
 </html>
