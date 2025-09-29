@@ -1,7 +1,7 @@
-/* MemoVibe — main JS
-   - stocke tout dans localStorage
-   - users: list of user objects {id,name,email,avatar,bio,following:[],followers:[]}
-   - posts: list of posts {id, userId, text, category, date, image, likes:[], comments: [{userId,text,date}]}
+/* MemoVibe — final interactions
+   - Tout en localStorage
+   - Menu hamburger, feed toggle, search chooser, posts, likes, comments, reactions
+   - Profile editing, avatar upload, follow/unfollow, modals
 */
 
 /* ---------- Helpers ---------- */
@@ -12,7 +12,9 @@ const now = () => new Date().toISOString();
 const formatDate = iso => {
   const d = new Date(iso);
   return d.toLocaleString();
-}
+};
+const nl2br = s => (s||'').replace(/\n/g,'<br/>');
+const escapeHtml = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
 /* ---------- Storage keys ---------- */
 const K_USERS = 'mv_users_v1';
@@ -31,77 +33,74 @@ function saveAll(){
   localStorage.setItem(K_CURRENT, currentUserId);
 }
 
-/* If no data, seed a few users and posts for an alive UI */
+/* Seed if empty (gives alive UI; you can remove later) */
 if(!users || !posts){
-  // create sample users
   users = [
-    {id: 'u1', name:'Alex', email:'alex@mail.com', avatar:'https://i.pravatar.cc/80?img=12', bio:'Développeur web', following:['u2'], followers:['u3']},
-    {id: 'u2', name:'Marie', email:'marie@mail.com', avatar:'https://i.pravatar.cc/80?img=5', bio:'Photographe', following:['u1','u3'], followers:['u1']},
-    {id: 'u3', name:'Léo', email:'leo@mail.com', avatar:'https://i.pravatar.cc/80?img=8', bio:'Étudiant', following:[], followers:['u2']},
+    {id: 'u1', name:'Alex', email:'alex@mail.com', avatar:'https://i.pravatar.cc/120?img=12', bio:'Développeur web', following:['u2'], followers:['u3']},
+    {id: 'u2', name:'Marie', email:'marie@mail.com', avatar:'https://i.pravatar.cc/120?img=5', bio:'Photographe', following:['u1','u3'], followers:['u1']},
+    {id: 'u3', name:'Léo', email:'leo@mail.com', avatar:'https://i.pravatar.cc/120?img=8', bio:'Étudiant', following:[], followers:['u2']},
   ];
   posts = [
-    {id:'p1', userId:'u2', text:'Entretien aujourd’hui ! J’ai appris beaucoup. Conseils ?', category:'travail', date: new Date(Date.now()-3600*1000*36).toISOString(), image:null, likes:['u1'], comments:[{userId:'u1', text:'Bonne chance !', date: now()}]},
+    {id:'p1', userId:'u2', text:'Entretien aujourd’hui ! J’ai appris beaucoup. Des conseils ?', category:'travail', date: new Date(Date.now()-3600*1000*36).toISOString(), image:null, likes:['u1'], comments:[{userId:'u1', text:'Bonne chance !', date: now()}]},
     {id:'p2', userId:'u1', text:'Voyage en montagne la semaine dernière : expérience incroyable.', category:'voyage', date: new Date(Date.now()-3600*1000*60).toISOString(), image:null, likes:[], comments:[]},
     {id:'p3', userId:'u3', text:'Rentrée: trouver un stage, stress mais motivé.', category:'études', date: new Date(Date.now()-3600*1000*10).toISOString(), image:null, likes:['u2'], comments:[]}
   ];
-  // create a current user (simulate logged in as Alex)
   currentUserId = 'u1';
-  localStorage.setItem(K_USERS, JSON.stringify(users));
-  localStorage.setItem(K_POSTS, JSON.stringify(posts));
-  localStorage.setItem(K_CURRENT, currentUserId);
+  saveAll();
 }
 
 /* ---------- Utility getters ---------- */
 function getUserById(id){ return users.find(u => u.id === id); }
-function getCurrentUser(){ return getUserById(currentUserId); }
-function getPosts(){ return posts.slice(); }
+function getCurrentUser(){ return users.find(u => u.id === currentUserId); }
 
-/* ---------- UI Elements ---------- */
-const miniAvatar = $('#miniAvatar');
-const miniAvatar2 = $('#miniAvatar2'); // profile page
+/* ---------- Elements ---------- */
+/* topbar */
+const hamburger = $('#hamburger');
+const sideMenu = $('#sideMenu');
+const closeMenu = $('#closeMenu');
+const themeToggle = $('#themeToggle');
+const themeToggle2 = $('#themeToggle2');
+
+/* search / refresh */
+const searchBar = $('#searchBar');
+const searchBarProfile = $('#searchBarProfile');
+const refreshBtn = $('#refreshBtn');
+const refreshBtn2 = $('#refreshBtn2');
+
+/* composer */
 const composerAvatar = $('#composerAvatar');
+const composerText = $('#composerText');
+const composerCategory = $('#composerCategory');
+const composerImage = $('#composerImage');
+const postBtn = $('#postBtn');
+
+/* lists / ui */
+const postsList = $('#postsList');
+const recentList = $('#recentList');
+const categoriesList = $('#categoriesList');
+const feedTitle = $('#feedTitle');
+const navBtns = $$('.nav-btn');
+const miniAvatar = $('#miniAvatar');
+const miniAvatar2 = $('#miniAvatar2');
 const sidebarAvatar = $('#sidebarAvatar');
 const sidebarName = $('#sidebarName');
 const sidebarBio = $('#sidebarBio');
 const statPosts = $('#statPosts');
 const statFollowing = $('#statFollowing');
 const statFollowers = $('#statFollowers');
-const statProfilePosts = $('#profilePosts');
-const statProfileFollowing = $('#profileFollowing');
-const statProfileFollowers = $('#profileFollowers');
-
-/* posts list */
-const postsList = $('#postsList');
-const recentList = $('#recentList');
-
-/* profile page specific */
-const profileName = $('#profileName');
-const profileBio = $('#profileBio');
-const profileAvatar = $('#profileAvatar');
-const userPostsEl = $('#userPosts');
-const followingList = $('#followingList');
-const followersList = $('#followersList');
 
 /* modal */
 const modal = $('#modal');
 const modalContent = $('#modalContent');
 const modalClose = $('#modalClose');
 
-/* search */
-const searchBar = $('#searchBar');
-const searchBarProfile = $('#searchBarProfile');
-
-/* feed controls */
-const feedTitle = $('#feedTitle');
-const navBtns = $$('.nav-btn');
-
-/* composer */
-const composerText = $('#composerText');
-const composerCategory = $('#composerCategory');
-const postBtn = $('#postBtn');
-const composerImage = $('#composerImage');
-
-/* profile controls*/
+/* profile page */
+const profileName = $('#profileName');
+const profileBio = $('#profileBio');
+const profileAvatar = $('#profileAvatar');
+const profilePostsEl = $('#userPosts');
+const followingList = $('#followingList');
+const followersList = $('#followersList');
 const avatarUpload = $('#avatarUpload');
 const editProfileBtn = $('#editProfileBtn');
 const profileEdit = $('#profileEdit');
@@ -110,13 +109,16 @@ const inputEmail = $('#inputEmail');
 const inputBio = $('#inputBio');
 const saveProfile = $('#saveProfile');
 const logoutBtn = $('#logoutBtn');
+const manageFollowing = $('#manageFollowing');
+const manageFollowers = $('#manageFollowers');
+const allUsersContainer = $('#allUsers');
 
-/* search modal chooser state */
-let searchMode = null; // 'profile' or 'experience'
-let currentFeed = 'friends'; // 'friends' | 'all' | 'me'
+/* state */
+let searchMode = null;
+let currentFeed = 'friends'; // friends/all/me
 
-/* ---------- Initialize UI ---------- */
-document.addEventListener('DOMContentLoaded', ()=> {
+/* ---------- Init ---------- */
+document.addEventListener('DOMContentLoaded', () => {
   applyTheme();
   wireEvents();
   renderAll();
@@ -133,8 +135,8 @@ function applyTheme(){
     document.body.classList.remove('dark-mode');
   }
 }
-$('#themeToggle') && $('#themeToggle').addEventListener('click', ()=> toggleTheme());
-$('#themeToggle2') && $('#themeToggle2').addEventListener('click', ()=> toggleTheme());
+$('#themeToggle') && $('#themeToggle').addEventListener('click', toggleTheme);
+$('#themeToggle2') && $('#themeToggle2').addEventListener('click', toggleTheme);
 function toggleTheme(){
   document.body.classList.toggle('dark-mode');
   const val = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
@@ -142,94 +144,93 @@ function toggleTheme(){
   applyTheme();
 }
 
-/* ---------- Events wiring ---------- */
+/* ---------- Wire events ---------- */
 function wireEvents(){
-  // refresh
-  $('#refreshBtn') && $('#refreshBtn').addEventListener('click', ()=>renderAll(true));
-  $('#refreshBtn2') && $('#refreshBtn2').addEventListener('click', ()=>renderAll(true));
+  // hamburger
+  hamburger && hamburger.addEventListener('click', ()=> { sideMenu.classList.add('show'); sideMenu.classList.remove('hidden'); });
+  closeMenu && closeMenu.addEventListener('click', ()=> closeSideMenu());
+  // clicking outside sideMenu closes it
+  document.addEventListener('click', (e)=> {
+    if(sideMenu && sideMenu.classList.contains('show') && !sideMenu.contains(e.target) && !hamburger.contains(e.target)){
+      closeSideMenu();
+    }
+  });
 
-  // feed nav
+  // feed nav buttons
   navBtns.forEach(b => b.addEventListener('click', ()=> {
     navBtns.forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
     currentFeed = b.dataset.feed;
-    feedTitle.textContent = (currentFeed==='friends') ? 'Abonnements' : (currentFeed==='all'? 'Général' : 'Mes posts');
+    feedTitle.textContent = currentFeed === 'friends' ? 'Abonnements' : (currentFeed === 'all' ? 'Général' : 'Mes posts');
     renderPosts();
   }));
 
-  // search bar: open modal to ask search type
+  // search
   searchBar && searchBar.addEventListener('click', openSearchChooser);
   searchBarProfile && searchBarProfile.addEventListener('click', openSearchChooser);
 
+  // refresh
+  refreshBtn && refreshBtn.addEventListener('click', ()=> renderAll(true));
+  refreshBtn2 && refreshBtn2.addEventListener('click', ()=> renderAll(true));
+
   // modal close
-  modalClose && modalClose.addEventListener('click', ()=> closeModal());
-  modal && modal.addEventListener('click', (e)=> { if(e.target===modal) closeModal(); });
+  modalClose && modalClose.addEventListener('click', closeModal);
+  modal && modal.addEventListener('click', (e)=> { if(e.target === modal) closeModal(); });
 
-  // post
+  // composer
   postBtn && postBtn.addEventListener('click', handlePost);
+  composerImage && composerImage.addEventListener('change', handleComposerImage);
 
-  // composer image
-  composerImage && composerImage.addEventListener('change', ()=> {
-    const f = composerImage.files[0];
-    if(!f) return;
-    const r = new FileReader();
-    r.onload = e => {
-      composerImage.dataset.preview = e.target.result;
-      showToast('Image attachée');
-    };
-    r.readAsDataURL(f);
-  });
-
-  // profile page actions
+  // profile page
   editProfileBtn && editProfileBtn.addEventListener('click', ()=> profileEdit.classList.toggle('hidden'));
   saveProfile && saveProfile.addEventListener('click', saveProfileChanges);
   avatarUpload && avatarUpload.addEventListener('change', handleAvatarUpload);
-  logoutBtn && logoutBtn.addEventListener('click', ()=> {
-    // simulate logout: choose another user if exists
-    const other = users.find(u => u.id !== currentUserId);
-    if(other){ currentUserId = other.id; localStorage.setItem(K_CURRENT, currentUserId); showToast('Utilisateur changé (simulé)'); renderAll(); }
-  });
+  logoutBtn && logoutBtn.addEventListener('click', switchUserQuick);
+  manageFollowing && manageFollowing.addEventListener('click', ()=> openListModal('following'));
+  manageFollowers && manageFollowers.addEventListener('click', ()=> openListModal('followers'));
 
-  // mini manage lists
+  // mini manage following/followers
   $('#manageFollowing') && $('#manageFollowing').addEventListener('click', ()=> openListModal('following'));
   $('#manageFollowers') && $('#manageFollowers').addEventListener('click', ()=> openListModal('followers'));
 }
 
-/* ---------- Rendering ---------- */
+/* ---------- UI actions ---------- */
+function closeSideMenu(){
+  sideMenu.classList.remove('show');
+  sideMenu.classList.add('hidden');
+}
+
+/* ---------- Render everything ---------- */
 function renderAll(force=false){
-  // re-load from storage to keep consistent
   users = JSON.parse(localStorage.getItem(K_USERS)) || users;
   posts = JSON.parse(localStorage.getItem(K_POSTS)) || posts;
   currentUserId = localStorage.getItem(K_CURRENT) || currentUserId;
 
-  // update mini avatars and sidebars
   const cur = getCurrentUser();
+  // topbar avatars + sidebar
   $('#miniAvatar') && (miniAvatar.src = cur.avatar || defaultAvatar());
   $('#miniAvatar2') && (miniAvatar2.src = cur.avatar || defaultAvatar());
   $('#composerAvatar') && (composerAvatar.src = cur.avatar || defaultAvatar());
   $('#sidebarAvatar') && (sidebarAvatar.src = cur.avatar || defaultAvatar());
-  sidebarName && (sidebarName.textContent = cur.name);
-  sidebarBio && (sidebarBio.textContent = cur.bio || '');
-  statPosts && (statPosts.textContent = posts.filter(p=>p.userId===currentUserId).length);
-  statFollowing && (statFollowing.textContent = cur.following.length);
-  statFollowers && (statFollowers.textContent = cur.followers.length);
+  $('#sidebarName') && (sidebarName.textContent = cur.name);
+  $('#sidebarBio') && (sidebarBio.textContent = cur.bio || '');
+  $('#statPosts') && (statPosts.textContent = posts.filter(p=>p.userId===currentUserId).length);
+  $('#statFollowing') && (statFollowing.textContent = (cur.following||[]).length);
+  $('#statFollowers') && (statFollowers.textContent = (cur.followers||[]).length);
 
-  // profile page parts
+  // profile page fields
   profileName && (profileName.textContent = cur.name);
   profileBio && (profileBio.textContent = cur.bio || '');
   profileAvatar && (profileAvatar.src = cur.avatar || defaultAvatar());
-  statProfilePosts && (statProfilePosts.textContent = posts.filter(p=>p.userId===currentUserId).length);
-  statProfileFollowing && (statProfileFollowing.textContent = cur.following.length);
-  statProfileFollowers && (statProfileFollowers.textContent = cur.followers.length);
+  $('#profilePosts') && ($('#profilePosts').textContent = posts.filter(p=>p.userId===currentUserId).length);
+  $('#profileFollowing') && ($('#profileFollowing').textContent = cur.following.length);
+  $('#profileFollowers') && ($('#profileFollowers').textContent = cur.followers.length);
 
-  // lists
   renderCategories();
   renderPosts();
   renderRecent();
   renderUserPosts();
   renderAllUsersInProfile();
-
-  // save
   saveAll();
 }
 
@@ -244,8 +245,7 @@ function renderCategories(){
     el.className = 'chip';
     el.textContent = c;
     el.addEventListener('click', ()=> {
-      searchMode = 'experience';
-      openSearchModal({ presetCategory: c });
+      openSearchModal({ mode:'experience', presetCategory: c });
     });
     container.appendChild(el);
   });
@@ -255,20 +255,19 @@ function renderCategories(){
 function renderPosts(){
   if(!postsList) return;
   postsList.innerHTML = '';
-  let visible = posts.slice().sort((a,b)=> new Date(b.date) - new Date(a.date)); // newest first
+  let visible = posts.slice().sort((a,b)=> new Date(b.date) - new Date(a.date));
+  const cur = getCurrentUser();
 
   if(currentFeed === 'friends'){
-    const cur = getCurrentUser();
-    visible = visible.filter(p => cur.following.includes(p.userId));
+    visible = visible.filter(p => (cur.following || []).includes(p.userId));
   } else if(currentFeed === 'me'){
     visible = visible.filter(p => p.userId === currentUserId);
-  } // 'all' shows all
+  } // else 'all' shows all
 
   visible.forEach(p => {
     const li = document.createElement('li');
     li.className = 'post-card';
     li.dataset.id = p.id;
-
     const user = getUserById(p.userId) || {name:'Utilisateur', avatar: defaultAvatar()};
     const likeCount = p.likes ? p.likes.length : 0;
     const commentCount = p.comments ? p.comments.length : 0;
@@ -309,7 +308,7 @@ function renderPosts(){
       </div>
     `;
 
-    // attach events
+    // events
     li.querySelector('.btn-like').addEventListener('click', ()=> toggleLike(p.id));
     li.querySelector('.btn-comment').addEventListener('click', ()=>{
       const comm = li.querySelector('.comments');
@@ -347,8 +346,8 @@ function renderRecent(){
 
 /* ---------- User posts (profile) ---------- */
 function renderUserPosts(){
-  if(!userPostsEl) return;
-  userPostsEl.innerHTML = '';
+  if(!profilePostsEl) return;
+  profilePostsEl.innerHTML = '';
   const myPosts = posts.filter(p => p.userId === currentUserId).sort((a,b)=>new Date(b.date)-new Date(a.date));
   myPosts.forEach(p=>{
     const li = document.createElement('li');
@@ -362,45 +361,12 @@ function renderUserPosts(){
         showToast('Post supprimé');
       }
     });
-    userPostsEl.appendChild(li);
-  });
-}
-
-/* ---------- All users in profile (for following/unfollow) ---------- */
-function renderAllUsersInProfile(){
-  if(!followingList) return;
-  const cur = getCurrentUser();
-  // following list
-  followingList.innerHTML = '';
-  cur.following.forEach(fid=>{
-    const u = getUserById(fid);
-    if(!u) return;
-    const div = document.createElement('div');
-    div.className = 'user-card';
-    div.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><img src="${u.avatar}" style="width:40px;height:40px;border-radius:8px"><div><strong>${u.name}</strong><div class="small muted">${u.bio||''}</div></div></div>
-      <div><button class="btn-ghost small" data-id="${u.id}">Se désabonner</button></div>`;
-    div.querySelector('button').addEventListener('click', ()=> {
-      unfollowUser(u.id);
-    });
-    followingList.appendChild(div);
-  });
-
-  // followers list
-  followersList && (followersList.innerHTML = '');
-  followersList && getCurrentUser().followers.forEach(fid=>{
-    const u = getUserById(fid);
-    if(!u) return;
-    const div = document.createElement('div');
-    div.className = 'user-card';
-    div.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><img src="${u.avatar}" style="width:40px;height:40px;border-radius:8px"><div><strong>${u.name}</strong><div class="small muted">${u.bio||''}</div></div></div>
-      <div><button class="btn-ghost small" data-id="${u.id}">Voir</button></div>`;
-    div.querySelector('button').addEventListener('click', ()=> openUserProfileModal(u.id));
-    followersList.appendChild(div);
+    profilePostsEl.appendChild(li);
   });
 }
 
 /* ---------- All users list for profile manage (sidebar) ---------- */
-function renderAllUsers(){
+function renderAllUsersInProfile(){
   const container = $('#allUsers');
   if(!container) return;
   container.innerHTML = '';
@@ -426,7 +392,8 @@ function followUser(targetId){
   if(!cur.following.includes(targetId)){
     cur.following.push(targetId);
     const target = getUserById(targetId);
-    target.followers.push(cur.id);
+    target.followers = target.followers || [];
+    if(!target.followers.includes(cur.id)) target.followers.push(cur.id);
     saveAndRefresh();
     showToast('Abonné ✔');
   }
@@ -463,7 +430,7 @@ function addComment(postId, text){
   saveAndRefresh();
 }
 
-/* ---------- Add reaction (emoji) as comment ---------- */
+/* ---------- Add reaction (emoji) ---------- */
 function addReaction(postId, emoji){
   addComment(postId, emoji);
   showToast('Réaction ajoutée');
@@ -480,13 +447,24 @@ function handlePost(){
   const image = composerImage.dataset && composerImage.dataset.preview ? composerImage.dataset.preview : null;
   const newPost = { id: 'p'+uid(), userId: currentUserId, text, category, date: now(), image, likes: [], comments: [] };
   posts.unshift(newPost);
-  // clear composer
   composerText.value = '';
   composerCategory.value = '';
   delete composerImage.dataset.preview;
   composerImage.value = '';
   saveAndRefresh();
   showToast('Post publié');
+}
+
+/* ---------- Composer image preview ---------- */
+function handleComposerImage(e){
+  const f = composerImage.files && composerImage.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    composerImage.dataset.preview = ev.target.result;
+    showToast('Image attachée');
+  };
+  r.readAsDataURL(f);
 }
 
 /* ---------- Avatar upload ---------- */
@@ -517,7 +495,7 @@ function saveProfileChanges(){
   showToast('Profil enregistré');
 }
 
-/* ---------- Open user profile in modal ---------- */
+/* ---------- Open user profile modal ---------- */
 function openUserProfileModal(userid){
   const u = getUserById(userid);
   if(!u) return;
@@ -530,7 +508,6 @@ function openUserProfileModal(userid){
     <div id="userPostsModal"><h4>Posts de ${escapeHtml(u.name)}</h4></div>
     <div style="margin-top:10px"><button id="followBtn" class="btn small">${ getCurrentUser().following.includes(u.id) ? 'Abonné' : 'Suivre' }</button></div>
   `;
-  // posts
   const up = posts.filter(p=>p.userId===u.id).sort((a,b)=>new Date(b.date)-new Date(a.date));
   const upEl = $('#userPostsModal');
   up.forEach(p=>{
@@ -539,23 +516,22 @@ function openUserProfileModal(userid){
     d.innerHTML = `<div><strong>${p.category||'aucune'}</strong> • ${formatDate(p.date)}</div><div>${escapeHtml(p.text)}</div>`;
     upEl.appendChild(d);
   });
-  // follow button
   $('#followBtn').addEventListener('click', ()=>{
     if(getCurrentUser().following.includes(u.id)) { unfollowUser(u.id); $('#followBtn').textContent = 'Suivre'; }
     else { followUser(u.id); $('#followBtn').textContent = 'Abonné'; }
   });
-
   openModal();
 }
 
-/* ---------- Open following/followers list modal ---------- */
+/* ---------- List modal (followers/following) ---------- */
 function openListModal(which){
   const cur = getCurrentUser();
-  let list = which === 'following' ? cur.following : cur.followers;
+  let list = which === 'following' ? (cur.following || []) : (cur.followers || []);
   modalContent.innerHTML = `<h3>${which === 'following' ? 'Abonnements' : 'Abonnés'}</h3><div id="listModalContent"></div>`;
   const container = $('#listModalContent');
   list.forEach(id=>{
     const u = getUserById(id);
+    if(!u) return;
     const el = document.createElement('div');
     el.className = 'user-card';
     el.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><img src="${u.avatar}" style="width:44px;height:44px;border-radius:8px"><div><strong>${u.name}</strong><div class="small muted">${u.bio||''}</div></div></div>
@@ -594,7 +570,6 @@ function openSearchModal(opts={}){
       renderSearchProfiles(res);
     });
   } else {
-    // experience search with category
     modalContent.innerHTML = `<h3>Recherche d'expériences</h3>
       <div style="display:flex;gap:8px"><input id="srchInputExp" placeholder="Texte..." style="flex:1;padding:10px;border-radius:8px;border:1px solid #e6eef8"/><select id="srchCat"><option value="">Toutes catégories</option><option>travail</option><option>études</option><option>voyage</option><option>santé</option><option>perso</option><option>autre</option></select></div>
       <div style="margin-top:10px"><button id="srchBtnExp" class="btn">Rechercher</button></div>
@@ -638,37 +613,144 @@ function renderSearchExperiences(list){
   });
 }
 
-/* ---------- Modal helpers ---------- */
-function openModal(){
-  modal.classList.remove('hidden');
-}
+/* ---------- Modal ---------- */
+function openModal(){ modal.classList.remove('hidden'); }
 function closeModal(){ modal.classList.add('hidden'); modalContent.innerHTML = ''; }
 
-/* ---------- Utility: render all users in sidebar profile area ---------- */
+/* ---------- Render profile lists ---------- */
 function renderAllUsersInProfile(){
   renderAllUsers();
+  if(!followingList || !followersList) return;
+  const cur = getCurrentUser();
+  followingList.innerHTML = '';
+  (cur.following || []).forEach(fid=>{
+    const u = getUserById(fid);
+    if(!u) return;
+    const div = document.createElement('div');
+    div.className = 'user-card';
+    div.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><img src="${u.avatar}" style="width:40px;height:40px;border-radius:8px"><div><strong>${u.name}</strong><div class="small muted">${u.bio||''}</div></div></div>
+      <div><button class="btn-ghost small" data-id="${u.id}">Se désabonner</button></div>`;
+    div.querySelector('button').addEventListener('click', ()=> unfollowUser(u.id));
+    followingList.appendChild(div);
+  });
+
+  followersList.innerHTML = '';
+  (cur.followers || []).forEach(fid=>{
+    const u = getUserById(fid);
+    if(!u) return;
+    const div = document.createElement('div');
+    div.className = 'user-card';
+    div.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><img src="${u.avatar}" style="width:40px;height:40px;border-radius:8px"><div><strong>${u.name}</strong><div class="small muted">${u.bio||''}</div></div></div>
+      <div><button class="btn-ghost small" data-id="${u.id}">Voir</button></div>`;
+    div.querySelector('button').addEventListener('click', ()=> openUserProfileModal(u.id));
+    followersList.appendChild(div);
+  });
 }
 
-/* ---------- Save and Refresh ---------- */
+/* ---------- All users in sidebar/profile area ---------- */
+function renderAllUsers(){
+  const container = allUsersContainer;
+  if(!container) return;
+  container.innerHTML = '';
+  users.forEach(u=>{
+    const cur = getCurrentUser();
+    if(u.id === cur.id) return;
+    const el = document.createElement('div');
+    el.className = 'user-card';
+    el.innerHTML = `<div style="display:flex;align-items:center"><img src="${u.avatar}" style="width:40px;height:40px;border-radius:8px;margin-right:10px"><div><strong>${u.name}</strong><div class="small muted">${u.bio||''}</div></div></div>
+      <div><button class="btn ${cur.following.includes(u.id)? 'btn-ghost' : ''}" data-id="${u.id}">${cur.following.includes(u.id)? 'Abonné' : 'Suivre'}</button></div>`;
+    const btn = el.querySelector('button');
+    btn.addEventListener('click', ()=> {
+      if(cur.following.includes(u.id)) unfollowUser(u.id);
+      else followUser(u.id);
+    });
+    container.appendChild(el);
+  });
+}
+
+/* ---------- Save and refresh helper ---------- */
 function saveAndRefresh(){
   saveAll();
   renderAll();
 }
 
-/* ---------- Modal open helpers ---------- */
+/* ---------- Small helpers ---------- */
 function defaultAvatar(){ return 'https://i.pravatar.cc/120?img=1'; }
-
-/* ---------- Helpers escape/html/nl2br ---------- */
-function escapeHtml(str){ return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function nl2br(s){ return (s||'').replace(/\n/g,'<br/>'); }
-
-/* ---------- Open profile modal for current user (for quick view) ---------- */
-function openUserProfile(userid){
-  openUserProfileModal(userid);
+function showToast(text, ms=1600){
+  const t = document.querySelector('.toast');
+  if(!t) return;
+  t.textContent = text;
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), ms);
 }
 
-/* ---------- Search helper public call ---------- */
+/* ---------- Switch user quick (simulate logout) ---------- */
+function switchUserQuick(){
+  const other = users.find(u => u.id !== currentUserId);
+  if(other){ currentUserId = other.id; localStorage.setItem(K_CURRENT, currentUserId); showToast('Utilisateur changé (simulé)'); renderAll(); }
+}
+
+/* ---------- Save profile changes ---------- */
+function saveProfileChanges(){
+  const name = inputName.value.trim();
+  const email = inputEmail.value.trim();
+  const bio = inputBio.value.trim();
+  const cur = getCurrentUser();
+  if(name) cur.name = name;
+  if(email) cur.email = email;
+  cur.bio = bio;
+  saveAndRefresh();
+  profileEdit.classList.add('hidden');
+  showToast('Profil enregistré');
+}
+
+/* ---------- Avatar upload handler ---------- */
+function handleAvatarUpload(e){
+  const f = e.target.files && e.target.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    const cur = getCurrentUser();
+    cur.avatar = ev.target.result;
+    saveAndRefresh();
+    showToast('Avatar mis à jour');
+  };
+  r.readAsDataURL(f);
+}
+
+/* ---------- Render lists and stats on profile page (user's posts) ---------- */
+function renderUserPosts(){
+  const el = profilePostsEl;
+  if(!el) return;
+  el.innerHTML = '';
+  const myPosts = posts.filter(p => p.userId === currentUserId).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  myPosts.forEach(p=>{
+    const li = document.createElement('li');
+    li.className = 'post-card';
+    li.innerHTML = `<div><strong>${p.category || 'aucune'}</strong> • ${formatDate(p.date)}</div><div>${escapeHtml(p.text)}</div>
+      <div style="margin-top:8px"><button class="btn-ghost small" data-id="${p.id}">Supprimer</button></div>`;
+    li.querySelector('button') && li.querySelector('button').addEventListener('click', ()=> {
+      if(confirm('Supprimer ce post ?')) {
+        posts = posts.filter(x=>x.id!==p.id);
+        saveAndRefresh();
+        showToast('Post supprimé');
+      }
+    });
+    el.appendChild(li);
+  });
+}
+
+/* ---------- Open/close modal helpers ---------- */
+function openModal(){ modal.classList.remove('hidden'); }
+function closeModal(){ modal.classList.add('hidden'); modalContent.innerHTML = ''; }
+
+/* ---------- Open user quick (global window) ---------- */
+window.openUserProfile = openUserProfileModal;
 window.openSearch = openSearchChooser;
 
-/* ---------- Small helpers ---------- */
-function getCurrentUser(){ return users.find(u=>u.id === currentUserId);
+/* ---------- Init final render ---------- */
+function initUIDefaults(){
+  // ensure DOM elements exist (some pages won't have all elements)
+  if($('#miniAvatar')) $('#miniAvatar').src = getCurrentUser().avatar || defaultAvatar();
+}
+initUIDefaults();
