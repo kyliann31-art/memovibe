@@ -7,28 +7,26 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-<body data-page="home">
+<body class="home-page">
   <div class="app">
-    <!-- HEADER -->
     <header class="topbar">
       <div class="left">
         <button id="hamburger" class="icon-btn" aria-label="Menu">☰</button>
         <div class="brand-name">MemoVibe</div>
       </div>
       <div class="center">
-        <input id="searchBar" class="search" placeholder="Rechercher (profil / expérience) — cliquez pour choisir..." readonly>
+        <input id="searchBar" class="search" placeholder="Rechercher (profil / expérience)" readonly>
       </div>
       <div class="right">
         <button id="refreshBtn" class="icon-btn" title="Rafraîchir">⭮</button>
         <a href="profile.html" class="profile-link" title="Profil">
-          <img id="miniAvatar" class="mini-avatar" src="" alt="Avatar utilisateur">
+          <img id="miniAvatar" class="mini-avatar" src="" alt="avatar">
         </a>
       </div>
     </header>
 
-    <!-- MAIN GRID -->
     <main class="main">
-      <!-- SIDE MENU -->
+      <!-- Side menu -->
       <aside id="sideMenu" class="side-menu hidden" aria-hidden="true">
         <div class="menu-inner">
           <button id="closeMenu" class="icon-btn close-menu" aria-label="Fermer menu">✕</button>
@@ -42,28 +40,30 @@
         </div>
       </aside>
 
-      <!-- LEFT SIDEBAR -->
+      <!-- Sidebar -->
       <aside class="sidebar">
         <nav class="nav card">
           <button class="nav-btn active" data-feed="friends">Abonnements</button>
           <button class="nav-btn" data-feed="all">Général</button>
           <button class="nav-btn" data-feed="mine">Mes expériences</button>
         </nav>
+
         <section class="cats card">
           <h4>Catégories</h4>
           <div id="categoriesList" class="categories"></div>
         </section>
+
         <section class="help card">
           <h4>Astuce</h4>
           <p>Clique sur une expérience pour voir le profil de l’auteur, liker, commenter ou réagir (emoji ajouté comme commentaire).</p>
         </section>
       </aside>
 
-      <!-- FEED -->
+      <!-- Feed -->
       <section class="feed">
-        <div class="composer card" id="composerCard" aria-live="polite">
+        <div class="composer card" id="composerCard">
           <div class="composer-top">
-            <img id="composerAvatar" class="avatar-md" src="" alt="Avatar utilisateur">
+            <img id="composerAvatar" class="avatar-md" src="" alt="avatar">
             <select id="composerCategory" class="select-cat" title="Catégorie">
               <option value="">Choisir une catégorie</option>
               <option value="travail">Travail</option>
@@ -88,18 +88,13 @@
           </div>
         </div>
 
-        <div class="feed-controls">
-          <div class="feed-title"><strong id="feedTitle">Abonnements</strong></div>
-          <div class="feed-actions small muted">Filtre: <span id="feedFilter">Tous</span></div>
-        </div>
-
         <ul id="postsList" class="posts-list" aria-live="polite"></ul>
       </section>
 
-      <!-- RIGHT COLUMN -->
+      <!-- Right column -->
       <aside class="rightcol">
         <div class="card profile-mini">
-          <img id="sidebarAvatar" class="avatar-lg" src="" alt="Avatar utilisateur">
+          <img id="sidebarAvatar" class="avatar-lg" src="" alt="avatar">
           <div class="profile-mini-info">
             <div id="sidebarName" class="bold">—</div>
             <div id="sidebarBio" class="muted small">—</div>
@@ -127,7 +122,6 @@
     </footer>
   </div>
 
-  <!-- MODAL -->
   <div id="modal" class="modal hidden" role="dialog" aria-hidden="true">
     <div class="modal-card">
       <button id="modalClose" class="modal-close" aria-label="Fermer">✕</button>
@@ -135,11 +129,10 @@
     </div>
   </div>
 
-  <!-- CREATE PROFILE OVERLAY -->
   <div id="createProfileOverlay" class="overlay hidden" role="dialog" aria-hidden="true">
     <div class="overlay-card">
       <h2>Créer votre profil</h2>
-      <p class="muted">Avant d'utiliser MemoVibe, créez votre profil personnel. Vous pourrez modifier ces infos plus tard.</p>
+      <p class="muted">Avant d'utiliser MemoVibe, créez votre profil personnel.</p>
       <input id="cp_name" placeholder="Nom d'utilisateur" />
       <input id="cp_email" placeholder="Email (optionnel)" />
       <textarea id="cp_bio" placeholder="Courte biographie (optionnel)" rows="3"></textarea>
@@ -154,9 +147,7 @@
     </div>
   </div>
 
-  <!-- TOAST -->
   <div class="toast" id="toast" aria-hidden="true"></div>
-
   <script src="script.js"></script>
 </body>
 </html>
