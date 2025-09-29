@@ -1,6 +1,3 @@
-/* =============================
-   MemoVibe — Social style (CSS)
-   ============================= */
 :root{
   --bg: #f5f8fb;
   --card: #ffffff;
@@ -31,8 +28,7 @@ a{color:inherit;text-decoration:none}
 .side-menu .menu-inner{position:relative;height:100%}
 .side-menu .close-menu{position:absolute;right:10px;top:10px}
 .side-menu.show{transform:translateX(0)}
-.side-menu .menu-nav{margin-top:36px;display:flex;flex-direction:column;gap:8px}
-.menu-link{padding:10px;border-radius:8px;color:var(--text);font-weight:600}
+.side-menu.hidden{display:block}
 
 /* Layout */
 .main{display:grid;grid-template-columns:220px 1fr 300px;gap:18px;padding:20px;max-width:1200px;margin:0 auto;flex:1}
@@ -53,6 +49,7 @@ a{color:inherit;text-decoration:none}
 .select-cat{padding:8px;border-radius:8px;border:1px solid #e6eef8}
 textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #e6eef8;resize:vertical;font-size:15px}
 .composer-actions{display:flex;justify-content:space-between;align-items:center}
+.file-label{cursor:pointer}
 
 /* Posts list */
 .posts-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px}
@@ -109,8 +106,14 @@ textarea{width:100%;padding:10px;border-radius:10px;border:1px solid #e6eef8;res
 .small{padding:6px 8px;font-size:13px;border-radius:8px}
 
 /* Toast */
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;padding:10px 16px;border-radius:12px;box-shadow:0 8px 30px rgba(12,14,20,0.18);opacity:0;pointer-events:none;transition:opacity .3s}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;padding:10px 16px;border-radius:12px;box-shadow:0 8px 30px rgba(12,14,20,0.18);opacity:0;pointer-events:none;transition:opacity .3s;z-index:60}
 .toast.show{opacity:1;pointer-events:auto}
+
+/* Dark mode */
+body.dark-mode{background:#0b0f14;color:#ddd}
+body.dark-mode .card{background:#0f1720}
+body.dark-mode .topbar{background:linear-gradient(90deg,#22272b,#2d3340)}
+body.dark-mode .search{background:#0f1720;color:#ddd}
 
 /* Responsive */
 @media (max-width:1000px){
