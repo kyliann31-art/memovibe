@@ -1,74 +1,99 @@
-/* ===============================
-   MemoVibe - script.js final complet
-   =============================== */
+/* ==============================
+   MemoVibe — script.js final amélioré
+   ============================== */
 
 /* -------------------------------
    Helpers : LocalStorage
-------------------------------- */
+--------------------------------*/
 function saveData(key, data) {
   localStorage.setItem(key, JSON.stringify(data));
 }
-
 function loadData(key, defaultValue = null) {
   let raw = localStorage.getItem(key);
   return raw ? JSON.parse(raw) : defaultValue;
 }
 
-function showToast(message, duration = 2500) {
-  const toastEl = document.getElementById("toast") || document.getElementById("toastProfile");
-  if (!toastEl) return;
-  toastEl.textContent = message;
-  toastEl.classList.add("show");
-  setTimeout(() => toastEl.classList.remove("show"), duration);
-}
-
 /* -------------------------------
    Données principales
-------------------------------- */
-let currentUser = loadData("memoUser", { name: "Utilisateur", email: "", bio: "", photo: "" });
-let posts = loadData("memoPosts", []);
-let users = loadData("memoUsers", [currentUser]);
-let follows = loadData("memoFollows", {});
+--------------------------------*/
+let currentUser = loadData("memoUser", {
+  name: "Utilisateur",
+  email: "",
+  bio: "",
+  photo: ""
+});
+
+let posts = loadData("memoPosts", []); // {id, author, authorId, content, category, likes, comments, reactions, date, steps}
+let users = loadData("memoUsers", [currentUser]); // tous les profils
+let follows = loadData("memoFollows", {}); // { userId: [listIds] }
 
 /* -------------------------------
-   Profil
-------------------------------- */
+   Profils
+--------------------------------*/
 function updateProfile(name, email, bio, photo) {
   currentUser.name = name;
   currentUser.email = email;
   currentUser.bio = bio;
-  if (photo) currentUser.photo = photo;
+  if(photo) currentUser.photo = photo;
 
-  const idx = users.findIndex(u => u.email === currentUser.email);
-  if (idx !== -1) users[idx] = currentUser;
-  else users.push(currentUser);
+  let idx = users.findIndex(u => u.email === currentUser.email);
+  if(idx !== -1){
+    users[idx] = currentUser;
+  } else {
+    users.push(currentUser);
+  }
 
   saveData("memoUser", currentUser);
   saveData("memoUsers", users);
-  showToast("Profil mis à jour !");
-  renderMiniAvatars();
+  updateUIProfile();
 }
 
-/* Charger profil sur profile.html */
-function loadProfilePage() {
-  document.getElementById("profileName").textContent = currentUser.name;
-  document.getElementById("profileBio").textContent = currentUser.bio || "Ta bio ici";
-  if (currentUser.photo) document.getElementById("profileAvatar").src = currentUser.photo;
+function updateUIProfile(){
+  // Mini-profile
+  let miniAvatar = document.getElementById("miniAvatar") || document.getElementById("miniAvatar2");
+  if(miniAvatar) miniAvatar.src = currentUser.photo || "default-avatar.png";
 
-  document.getElementById("profilePosts").textContent = posts.filter(p => p.authorId === currentUser.email).length;
-  document.getElementById("profileFollowing").textContent = (follows[currentUser.email] || []).length;
-  document.getElementById("profileFollowers").textContent = Object.values(follows).filter(list => list.includes(currentUser.email)).length;
+  // Sidebar
+  let sidebarAvatar = document.getElementById("sidebarAvatar");
+  if(sidebarAvatar) sidebarAvatar.src = currentUser.photo || "default-avatar.png";
+  let sidebarName = document.getElementById("sidebarName");
+  if(sidebarName) sidebarName.textContent = currentUser.name;
+  let sidebarBio = document.getElementById("sidebarBio");
+  if(sidebarBio) sidebarBio.textContent = currentUser.bio;
 
-  renderUserPosts();
-  renderFollowingList();
-  renderFollowersList();
+  let statPosts = document.getElementById("statPosts");
+  let statFollowers = document.getElementById("statFollowers");
+  let statFollowing = document.getElementById("statFollowing");
+  if(statPosts) statPosts.textContent = posts.filter(p => p.authorId === currentUser.email).length;
+  if(statFollowers) statFollowers.textContent = Object.values(follows).filter(arr => arr.includes(currentUser.email)).length;
+  if(statFollowing) statFollowing.textContent = follows[currentUser.email]?.length || 0;
+}
+
+function loadProfilePage(){
+  let nameEl = document.getElementById("profileName");
+  let bioEl = document.getElementById("profileBio");
+  let photoEl = document.getElementById("profileAvatar");
+  if(nameEl) nameEl.textContent = currentUser.name;
+  if(bioEl) bioEl.textContent = currentUser.bio;
+  if(photoEl) photoEl.src = currentUser.photo || "default-avatar.png";
+
+  let postList = document.getElementById("userPosts");
+  if(postList){
+    postList.innerHTML = "";
+    posts.filter(p => p.authorId === currentUser.email).forEach(p => {
+      postList.appendChild(renderPost(p));
+    });
+  }
+
+  updateUIProfile();
 }
 
 /* -------------------------------
    Posts
-------------------------------- */
-function addPost(content, category, image = null) {
-  const newPost = {
+--------------------------------*/
+function addPost(content, category, steps=[]){
+  if(!content) return;
+  let newPost = {
     id: Date.now(),
     author: currentUser.name,
     authorId: currentUser.email,
@@ -77,44 +102,62 @@ function addPost(content, category, image = null) {
     likes: 0,
     comments: [],
     reactions: [],
-    date: new Date().toISOString(),
-    image
+    steps,
+    date: new Date().toISOString()
   };
   posts.unshift(newPost);
   saveData("memoPosts", posts);
-  renderFeed(currentFeedFilter || "friends");
-  showToast("Expérience publiée !");
+  renderFeed();
 }
 
-function likePost(postId) {
-  const post = posts.find(p => p.id === postId);
-  if (post) { post.likes++; saveData("memoPosts", posts); renderFeed(currentFeedFilter); }
+function likePost(postId){
+  let post = posts.find(p => p.id === postId);
+  if(post){
+    post.likes++;
+    saveData("memoPosts", posts);
+    renderFeed();
+  }
 }
 
-function commentPost(postId, text) {
-  const post = posts.find(p => p.id === postId);
-  if (post) { post.comments.push({ author: currentUser.name, text }); saveData("memoPosts", posts); renderFeed(currentFeedFilter); }
+function commentPost(postId, text){
+  let post = posts.find(p => p.id === postId);
+  if(post && text){
+    post.comments.push({author: currentUser.name, text});
+    saveData("memoPosts", posts);
+    renderFeed();
+  }
 }
 
-function reactPost(postId, emoji) {
-  const post = posts.find(p => p.id === postId);
-  if (post) { post.reactions.push({ author: currentUser.name, emoji }); saveData("memoPosts", posts); renderFeed(currentFeedFilter); }
+function reactPost(postId, emoji){
+  let post = posts.find(p => p.id === postId);
+  if(post && emoji){
+    post.reactions.push({author: currentUser.name, emoji});
+    saveData("memoPosts", posts);
+    renderFeed();
+  }
 }
 
 /* -------------------------------
-   Render Posts
-------------------------------- */
-function renderPost(post) {
-  const div = document.createElement("div");
-  div.className = "post-card";
+   Render Post
+--------------------------------*/
+function renderPost(post){
+  let li = document.createElement("div");
+  li.className = "post-card";
 
-  div.innerHTML = `
+  // Steps
+  let stepsHTML = "";
+  if(post.steps && post.steps.length){
+    stepsHTML = `<div class="post-steps">` + post.steps.map(s => `<div class="post-step">• ${s}</div>`).join("") + `</div>`;
+  }
+
+  li.innerHTML = `
     <div class="post-header">
+      <img class="avatar" src="${getUserPhoto(post.authorId)}" alt="avatar">
       <div class="post-author">${post.author}</div>
       <div class="post-date">${new Date(post.date).toLocaleString()}</div>
     </div>
     <div class="post-content">${post.content}</div>
-    ${post.image ? `<img class="post-image" src="${post.image}" alt="image post">` : ""}
+    ${stepsHTML}
     <div class="post-category">Catégorie : ${post.category}</div>
     <div class="post-actions">
       <button class="btn-like">👍 ${post.likes}</button>
@@ -125,131 +168,82 @@ function renderPost(post) {
       ${post.comments.map(c => `<p><strong>${c.author}:</strong> ${c.text}</p>`).join("")}
     </div>
     <div class="post-reactions">
-      ${post.reactions.map(r => `<span>${r.emoji}</span>`).join(" ")}
+      ${post.reactions.map(r => `<span class="post-emotion">${r.emoji}</span>`).join(" ")}
     </div>
   `;
 
-  div.querySelector(".btn-like").addEventListener("click", () => likePost(post.id));
-  div.querySelector(".btn-comment").addEventListener("click", () => {
-    const text = prompt("Votre commentaire :");
-    if (text) commentPost(post.id, text);
+  li.querySelector(".btn-like").addEventListener("click", () => likePost(post.id));
+  li.querySelector(".btn-comment").addEventListener("click", () => {
+    let text = prompt("Votre commentaire :");
+    if(text) commentPost(post.id, text);
   });
-  div.querySelector(".btn-react").addEventListener("click", () => {
-    const emoji = prompt("Entrez un emoji :");
-    if (emoji) reactPost(post.id, emoji);
+  li.querySelector(".btn-react").addEventListener("click", () => {
+    let emoji = prompt("Entrez un emoji :");
+    if(emoji) reactPost(post.id, emoji);
   });
 
-  return div;
+  return li;
+}
+
+function getUserPhoto(email){
+  let u = users.find(u => u.email === email);
+  return u?.photo || "default-avatar.png";
 }
 
 /* -------------------------------
-   Feed rendering
-------------------------------- */
-let currentFeedFilter = "friends";
+   Feed
+--------------------------------*/
+function renderFeed(filter="friends"){
+  let feed = document.getElementById("postsList") || document.getElementById("feed");
+  if(!feed) return;
 
-function renderFeed(filter = "friends") {
-  currentFeedFilter = filter;
-  const feedEl = document.getElementById("postsList") || document.getElementById("feed");
-  if (!feedEl) return;
+  feed.innerHTML = "";
 
-  feedEl.innerHTML = "";
   let visiblePosts = [];
-
-  if (filter === "friends") {
-    const following = follows[currentUser.email] || [];
+  if(filter === "friends"){
+    let following = follows[currentUser.email] || [];
     visiblePosts = posts.filter(p => following.includes(p.authorId));
-  } else if (filter === "mine") {
+  } else if(filter === "mine"){
     visiblePosts = posts.filter(p => p.authorId === currentUser.email);
   } else {
     visiblePosts = posts;
   }
 
-  if (visiblePosts.length === 0) {
-    feedEl.innerHTML = "<p>Aucune expérience partagée pour le moment.</p>";
+  if(visiblePosts.length === 0){
+    feed.innerHTML = "<p>Aucune expérience partagée pour le moment.</p>";
     return;
   }
 
-  visiblePosts.forEach(p => feedEl.appendChild(renderPost(p)));
+  visiblePosts.forEach(p => feed.appendChild(renderPost(p)));
 }
 
 /* -------------------------------
-   User Posts & Followers/Following
-------------------------------- */
-function renderUserPosts() {
-  const postList = document.getElementById("userPosts");
-  if (!postList) return;
-  postList.innerHTML = "";
-  posts.filter(p => p.authorId === currentUser.email).forEach(p => postList.appendChild(renderPost(p)));
-}
-
-function renderFollowingList() {
-  const el = document.getElementById("followingList");
-  if (!el) return;
-  el.innerHTML = "";
-  (follows[currentUser.email] || []).forEach(email => {
-    const user = users.find(u => u.email === email);
-    if (user) {
-      const div = document.createElement("div");
-      div.textContent = user.name;
-      el.appendChild(div);
-    }
-  });
-}
-
-function renderFollowersList() {
-  const el = document.getElementById("followersList");
-  if (!el) return;
-  el.innerHTML = "";
-  Object.entries(follows).forEach(([uid, list]) => {
-    if (list.includes(currentUser.email)) {
-      const user = users.find(u => u.email === uid);
-      if (user) {
-        const div = document.createElement("div");
-        div.textContent = user.name;
-        el.appendChild(div);
-      }
-    }
-  });
-}
-
-/* -------------------------------
-   Mini avatar rendering
-------------------------------- */
-function renderMiniAvatars() {
-  document.querySelectorAll("#miniAvatar, #miniAvatar2").forEach(img => { if (currentUser.photo) img.src = currentUser.photo; });
-  document.querySelectorAll("#composerAvatar").forEach(img => { if (currentUser.photo) img.src = currentUser.photo; });
-  document.querySelectorAll("#sidebarAvatar").forEach(img => { if (currentUser.photo) img.src = currentUser.photo; });
-}
-
-/* -------------------------------
-   Abonnements
-------------------------------- */
-function followUser(targetEmail) {
-  if (!follows[currentUser.email]) follows[currentUser.email] = [];
-  if (!follows[currentUser.email].includes(targetEmail)) {
-    follows[currentUser.email].push(targetEmail);
+   Follows
+--------------------------------*/
+function followUser(email){
+  if(!follows[currentUser.email]) follows[currentUser.email] = [];
+  if(!follows[currentUser.email].includes(email)){
+    follows[currentUser.email].push(email);
     saveData("memoFollows", follows);
-    showToast("Vous suivez maintenant " + targetEmail);
   }
 }
 
-function unfollowUser(targetEmail) {
-  if (!follows[currentUser.email]) return;
-  follows[currentUser.email] = follows[currentUser.email].filter(e => e !== targetEmail);
+function unfollowUser(email){
+  if(!follows[currentUser.email]) return;
+  follows[currentUser.email] = follows[currentUser.email].filter(e => e !== email);
   saveData("memoFollows", follows);
-  showToast("Vous ne suivez plus " + targetEmail);
 }
 
 /* -------------------------------
-   Search
-------------------------------- */
-function search(type, query, category = null) {
-  if (type === "profile") {
+   Recherche
+--------------------------------*/
+function search(type, query, category=null){
+  if(type === "profile"){
     return users.filter(u => u.name.toLowerCase().includes(query.toLowerCase()));
-  } else if (type === "experience") {
+  } else if(type === "experience"){
     return posts.filter(p => {
-      const matchText = p.content.toLowerCase().includes(query.toLowerCase());
-      const matchCat = category ? p.category === category : true;
+      let matchText = p.content.toLowerCase().includes(query.toLowerCase());
+      let matchCat = category ? p.category === category : true;
       return matchText && matchCat;
     });
   }
@@ -257,108 +251,47 @@ function search(type, query, category = null) {
 }
 
 /* -------------------------------
-   Hamburger menu
-------------------------------- */
-function setupMenu() {
-  document.querySelectorAll("#hamburger, #hamburger2").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.getElementById("sideMenu").classList.toggle("show");
-    });
-  });
+   Menu
+--------------------------------*/
+function setupMenu(){
+  let btns = document.querySelectorAll("#hamburger, #hamburger2");
+  let menu = document.getElementById("sideMenu");
+  let closeBtn = document.getElementById("closeMenu");
 
-  document.getElementById("closeMenu")?.addEventListener("click", () => {
-    document.getElementById("sideMenu").classList.remove("show");
-  });
+  btns.forEach(btn => btn.addEventListener("click", () => {
+    if(menu) menu.classList.toggle("show");
+  }));
+  if(closeBtn) closeBtn.addEventListener("click", () => menu.classList.remove("show"));
 }
 
 /* -------------------------------
-   File input handlers
-------------------------------- */
-function setupFileInputs() {
-  const avatarInputs = ["cp_avatar", "avatarUpload"];
-  avatarInputs.forEach(id => {
-    const input = document.getElementById(id);
-    if (input) {
-      input.addEventListener("change", e => {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function(evt) {
-            updateProfile(currentUser.name, currentUser.email, currentUser.bio, evt.target.result);
-          }
-          reader.readAsDataURL(file);
-        }
-      });
-    }
-  });
+   Initialisation
+--------------------------------*/
+document.addEventListener("DOMContentLoaded", () => {
+  setupMenu();
+  updateUIProfile();
+  renderFeed("friends");
 
-  const postImageInput = document.getElementById("composerImage");
-  if (postImageInput) {
-    postImageInput.addEventListener("change", e => {
-      const file = e.target.files[0];
-      if (file) {
-        document.getElementById("composerImageName").textContent = file.name;
+  if(document.body.classList.contains("profile-main")){
+    loadProfilePage();
+  }
+
+  // Composer
+  let postBtn = document.getElementById("postBtn");
+  if(postBtn){
+    postBtn.addEventListener("click", () => {
+      let content = document.getElementById("composerText").value;
+      let category = document.getElementById("composerCategory").value;
+      if(content && category){
+        // steps (nouvelle fonctionnalité)
+        let steps = [];
+        document.querySelectorAll(".composer-step").forEach(s => {
+          if(s.value) steps.push(s.value);
+        });
+        addPost(content, category, steps);
+        document.getElementById("composerText").value = "";
+        document.getElementById("composerCategory").value = "";
       }
     });
   }
-}
-
-/* -------------------------------
-   Modal handling
-------------------------------- */
-function setupModals() {
-  document.querySelectorAll("#modalClose").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.getElementById("modal").classList.add("hidden");
-    });
-  });
-}
-
-/* -------------------------------
-   Initialisation DOM
-------------------------------- */
-document.addEventListener("DOMContentLoaded", () => {
-  setupMenu();
-  setupFileInputs();
-  setupModals();
-  renderMiniAvatars();
-  renderFeed(currentFeedFilter);
-
-  if (document.body.classList.contains("profile-page")) loadProfilePage();
-
-  document.getElementById("postBtn")?.addEventListener("click", () => {
-    const content = document.getElementById("composerText").value;
-    const category = document.getElementById("composerCategory").value;
-    let image = null;
-    const fileInput = document.getElementById("composerImage");
-    if (fileInput?.files[0]) {
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        addPost(content, category, evt.target.result);
-      }
-      reader.readAsDataURL(fileInput.files[0]);
-    } else if (content && category) {
-      addPost(content, category);
-    }
-    document.getElementById("composerText").value = "";
-    document.getElementById("composerCategory").value = "";
-    document.getElementById("composerImageName").textContent = "";
-  });
-
-  document.getElementById("cpCreate")?.addEventListener("click", () => {
-    const name = document.getElementById("cp_name").value || currentUser.name;
-    const email = document.getElementById("cp_email").value || currentUser.email;
-    const bio = document.getElementById("cp_bio").value || currentUser.bio;
-    updateProfile(name, email, bio);
-    document.getElementById("createProfileOverlay").classList.add("hidden");
-  });
-
-  document.getElementById("cpSkip")?.addEventListener("click", () => {
-    document.getElementById("createProfileOverlay").classList.add("hidden");
-  });
-
-  // Feed buttons
-  document.getElementById("feedFriends")?.addEventListener("click", () => renderFeed("friends"));
-  document.getElementById("feedGeneral")?.addEventListener("click", () => renderFeed("all"));
-  document.getElementById("feedMine")?.addEventListener("click", () => renderFeed("mine"));
 });
