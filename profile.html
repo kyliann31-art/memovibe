@@ -12,7 +12,7 @@
     <header class="topbar">
       <div class="left">
         <button id="hamburger2" class="icon-btn">☰</button>
-        <div class="brand"><div class="brand-logo">📝</div><div class="brand-name">MemoVibe</div></div>
+        <div class="brand-name">MemoVibe</div>
       </div>
       <div class="center">
         <input id="searchBarProfile" class="search" placeholder="Rechercher..." readonly>
@@ -40,7 +40,7 @@
               <div class="profile-actions">
                 <label class="upload-btn">Changer avatar <input id="avatarUpload" type="file" accept="image/*" hidden></label>
                 <button id="editProfileBtn" class="btn-ghost">Modifier profil</button>
-                <button id="logoutBtn" class="btn-ghost">Déconnexion</button>
+                <button id="logoutBtn" class="btn-ghost">Changer utilisateur</button>
               </div>
             </div>
           </div>
@@ -58,7 +58,7 @@
 
         <div class="card user-posts">
           <h3>Mes expériences</h3>
-          <ul id="userPosts"></ul>
+          <ul id="userPosts" class="posts-list"></ul>
         </div>
       </section>
 
@@ -85,7 +85,6 @@
         <div id="modalContent"></div>
       </div>
     </div>
-
   </div>
 
   <script src="script.js"></script>
