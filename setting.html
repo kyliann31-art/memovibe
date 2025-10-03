@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Paramètres - MemoVibe</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="topbar">
+    <button class="icon-btn" onclick="window.location='index.html'">⬅</button>
+    <div>Paramètres</div>
+  </div>
+
+  <div class="main">
+    <div class="card" style="grid-column:1/-1">
+      <h2>Paramètres utilisateur</h2>
+      <label><input type="checkbox" id="darkModeToggle"> Mode sombre</label><br><br>
+      <label>Langue :
+        <select id="langSelect">
+          <option value="fr">Français</option>
+          <option value="en">English</option>
+        </select>
+      </label><br><br>
+      <button id="clearDataBtn">Effacer mes données</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
