@@ -1,142 +1,77 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MemoVibe — Accueil</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>MemoVibe</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app">
-    <!-- Topbar -->
-    <header class="topbar">
-      <div class="left">
-        <button id="hamburger" class="icon-btn" aria-label="Menu">☰</button>
-        <div class="brand-name">MemoVibe</div>
-      </div>
-      <div class="center">
-        <input id="searchBar" class="search" placeholder="Rechercher..." readonly>
-      </div>
-      <div class="right">
-        <button id="refreshBtn" class="icon-btn" title="Rafraîchir">⭮</button>
-        <a href="profile.html" class="profile-link" title="Profil"><img id="miniAvatar" class="mini-avatar" src="default-avatar.png" alt="avatar"></a>
-      </div>
-    </header>
-
-    <!-- Main -->
-    <main class="main">
-      <!-- Side menu -->
-      <aside id="sideMenu" class="side-menu hidden" aria-hidden="true">
-        <div class="menu-inner">
-          <button id="closeMenu" class="icon-btn close-menu" aria-label="Fermer menu">✕</button>
-          <nav class="menu-nav">
-            <a href="index.html" class="menu-link active">Accueil</a>
-            <a href="profile.html" class="menu-link">Profil</a>
-            <button id="menuCreateAccount" class="menu-link btn-ghost">Créer un autre profil</button>
-            <button id="menuReset" class="menu-link btn-ghost">Réinitialiser les données</button>
-          </nav>
-          <div class="menu-footer small muted">MemoVibe — carnet d'expériences</div>
-        </div>
-      </aside>
-
-      <!-- Left Sidebar -->
-      <aside class="sidebar">
-        <nav class="nav card">
-          <button class="nav-btn active" data-feed="friends" id="feedFriends">Abonnements</button>
-          <button class="nav-btn" data-feed="all" id="feedGeneral">Général</button>
-          <button class="nav-btn" data-feed="mine" id="feedMine">Mes expériences</button>
-        </nav>
-
-        <section class="cats card">
-          <h4>Catégories</h4>
-          <div id="categoriesList" class="categories"></div>
-        </section>
-
-        <section class="help card">
-          <h4>Astuce</h4>
-          <p>Clique sur une expérience pour voir le profil de l’auteur, liker, commenter ou réagir (emoji ajouté comme commentaire).</p>
-        </section>
-
-        <section class="card">
-          <h4>Notifications</h4>
-          <div id="notifications" class="notifications"></div>
-        </section>
-      </aside>
-
-      <!-- Feed -->
-      <section class="feed" id="feed">
-        <!-- Composer -->
-        <div class="composer card" id="composerCard" aria-live="polite">
-          <div class="composer-top">
-            <img id="composerAvatar" class="avatar-md" src="default-avatar.png" alt="avatar">
-            <select id="composerCategory" class="select-cat" title="Catégorie">
-              <option value="">Choisir une catégorie</option>
-              <option value="travail">Travail</option>
-              <option value="études">Études</option>
-              <option value="voyage">Voyage</option>
-              <option value="santé">Santé</option>
-              <option value="perso">Personnel</option>
-              <option value="autre">Autre</option>
-            </select>
-          </div>
-          <textarea id="composerText" placeholder="Partager une expérience..." rows="3" aria-label="Texte de l'expérience"></textarea>
-          <div class="composer-actions">
-            <div class="left">
-              <label class="file-label" title="Ajouter une image">📎
-                <input id="composerImage" type="file" accept="image/*" hidden>
-              </label>
-              <span id="composerImageName" class="small muted"></span>
-            </div>
-            <div class="right">
-              <button id="postBtn" class="btn">Publier</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Right Column -->
-      <aside class="rightcol">
-        <div class="card profile-mini">
-          <img id="sidebarAvatar" class="avatar-lg" src="default-avatar.png" alt="avatar">
-          <div class="profile-mini-info">
-            <div id="sidebarName" class="bold">—</div>
-            <div id="sidebarBio" class="muted small">—</div>
-            <div class="stats">
-              <div><strong id="statPosts">0</strong><div class="small">Posts</div></div>
-              <div><strong id="statFollowing">0</strong><div class="small">Abonnements</div></div>
-              <div><strong id="statFollowers">0</strong><div class="small">Abonnés</div></div>
-              <div><strong id="statPoints">0</strong><div class="small">Points</div></div>
-            </div>
-          </div>
-        </div>
-      </aside>
-    </main>
-
-    <footer class="footer">
-      <small>© 2025 MemoVibe</small>
-    </footer>
-  </div>
-
-  <!-- Overlay Create Profile -->
-  <div id="createProfileOverlay" class="overlay hidden" role="dialog" aria-hidden="true">
-    <div class="overlay-card">
-      <h2>Créer votre profil</h2>
-      <input id="cp_name" placeholder="Nom d'utilisateur" />
-      <input id="cp_email" placeholder="Email (optionnel)" />
-      <textarea id="cp_bio" placeholder="Courte biographie (optionnel)" rows="3"></textarea>
-      <div style="display:flex;gap:8px;align-items:center">
-        <label class="upload-btn">Choisir avatar <input id="cp_avatar" type="file" accept="image/*" hidden></label>
-        <span id="cpAvatarName" class="small muted"></span>
-      </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
-        <button id="cpSkip" class="btn-ghost">Passer</button>
-        <button id="cpCreate" class="btn">Créer le profil</button>
-      </div>
+  <!-- Barre supérieure -->
+  <div class="topbar">
+    <button class="icon-btn" id="hamburger">☰</button>
+    <div class="brand-name">MemoVibe</div>
+    <input class="search" placeholder="Rechercher...">
+    <div>
+      <button class="icon-btn" id="refreshBtn">🔄</button>
+      <button class="icon-btn" id="menuCreateAccount">👤</button>
+      <button class="icon-btn" onclick="window.location='settings.html'">⚙️</button>
     </div>
   </div>
 
-  <div class="toast" id="toast" aria-hidden="true"></div>
+  <div class="main">
+    <!-- Sidebar -->
+    <div class="sidebar card">
+      <img id="sidebarAvatar" src="default-avatar.png" class="avatar-md">
+      <h3 id="sidebarName">Utilisateur</h3>
+      <p id="sidebarBio" class="muted">—</p>
+      <div>Posts: <span id="statPosts">0</span></div>
+      <div>Abonnés: <span id="statFollowers">0</span></div>
+      <div>Abonnements: <span id="statFollowing">0</span></div>
+      <div>Points: <span id="statPoints">0</span></div>
+      <button onclick="window.location='profile.html'">Voir profil</button>
+    </div>
+
+    <!-- Feed -->
+    <div class="feed">
+      <div class="composer card">
+        <textarea id="composerText" placeholder="Exprimez-vous..."></textarea>
+        <select id="composerCategory" class="select-cat">
+          <option value="">Choisir une catégorie</option>
+          <option value="astuce">Astuce</option>
+          <option value="conseil">Conseil</option>
+          <option value="expérience">Expérience</option>
+        </select>
+        <input type="file" id="composerImage">
+        <span id="composerImageName"></span>
+        <button id="postBtn">Publier</button>
+      </div>
+      <div id="feedContainer"></div>
+    </div>
+
+    <!-- Colonne droite -->
+    <div class="rightcol card">
+      <h3>Notifications</h3>
+      <div id="notifications"></div>
+      <h3>Défis</h3>
+      <div id="challenges"></div>
+    </div>
+  </div>
+
+  <!-- Overlay création de profil -->
+  <div id="createProfileOverlay" class="overlay hidden">
+    <div class="card" style="padding:20px;max-width:400px">
+      <h2>Créer votre profil</h2>
+      <input id="cp_name" placeholder="Nom"><br>
+      <input id="cp_email" placeholder="Email"><br>
+      <textarea id="cp_bio" placeholder="Bio"></textarea><br>
+      <input type="file" id="cp_avatar"><br><br>
+      <button id="cpCreate">Créer</button>
+      <button id="cpSkip">Ignorer</button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
 
   <script src="script.js"></script>
 </body>
