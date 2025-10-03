@@ -1,110 +1,60 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MemoVibe — Profil</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>Profil - MemoVibe</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app">
-    <!-- Topbar -->
-    <header class="topbar">
-      <div class="left">
-        <button id="hamburger2" class="icon-btn">☰</button>
-        <div class="brand-name">MemoVibe</div>
-      </div>
-      <div class="center">
-        <input id="searchBarProfile" class="search" placeholder="Rechercher..." readonly>
-      </div>
-      <div class="right">
-        <button id="refreshBtn2" class="icon-btn">⭮</button>
-        <a href="index.html" class="profile-link" title="Accueil">🏠</a>
-        <a href="profile.html" class="profile-link"><img id="miniAvatar2" class="mini-avatar" src="default-avatar.png" alt="avatar"></a>
-      </div>
-    </header>
+  <div class="topbar">
+    <button class="icon-btn" onclick="window.location='index.html'">⬅</button>
+    <div>Profil</div>
+    <button class="icon-btn" id="refreshBtn2">🔄</button>
+    <button class="icon-btn" onclick="window.location='settings.html'">⚙️</button>
+  </div>
 
-    <!-- Main -->
-    <main class="main profile-main">
-      <!-- Left section -->
-      <section class="profile-left">
-        <div class="card profile-card-large">
-          <div class="profile-top">
-            <img id="profileAvatar" class="avatar-xl" src="default-avatar.png" alt="avatar">
-            <div class="profile-info">
-              <h2 id="profileName">—</h2>
-              <p id="profileBio" class="muted">Ta bio ici</p>
-              <div class="profile-stats">
-                <div><strong id="profilePosts">0</strong><span>posts</span></div>
-                <div><strong id="profileFollowing">0</strong><span>abonnements</span></div>
-                <div><strong id="profileFollowers">0</strong><span>abonnés</span></div>
-                <div><strong id="profilePoints">0</strong><span>points</span></div>
-              </div>
-              <div class="profile-actions">
-                <button id="editProfileBtn" class="btn-ghost">Modifier profil</button>
-                <button id="logoutBtn" class="btn-ghost">Changer utilisateur</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Edit profile form -->
-          <div class="profile-edit card hidden" id="profileEdit">
-            <h4>Modifier</h4>
-            <input id="inputName" placeholder="Nom">
-            <input id="inputEmail" placeholder="Email">
-            <textarea id="inputBio" placeholder="Bio (ex : études, travail...)" rows="3"></textarea>
-            <div style="display:flex;justify-content:flex-end;margin-top:8px">
-              <button id="saveProfile" class="btn">Enregistrer</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- User posts -->
-        <div class="card user-posts">
-          <h3>Mes expériences</h3>
-          <ul id="userPosts" class="posts-list"></ul>
-        </div>
-      </section>
-
-      <!-- Right section -->
-      <aside class="profile-right">
-        <div class="card">
-          <h4>Abonnements</h4>
-          <div id="followingList"></div>
-        </div>
-
-        <div class="card">
-          <h4>Abonnés</h4>
-          <div id="followersList"></div>
-        </div>
-
-        <div class="card">
-          <h4>Notifications</h4>
-          <div id="notificationsProfile"></div>
-        </div>
-
-        <div class="card">
-          <h4>Défis</h4>
-          <ul id="dailyChallenges"></ul>
-        </div>
-      </aside>
-    </main>
-
-    <footer class="footer">
-      <small>© 2025 MemoVibe</small>
-    </footer>
-
-    <!-- Modal -->
-    <div id="modal" class="modal hidden" role="dialog" aria-hidden="true">
-      <div class="modal-card">
-        <button id="modalClose" class="modal-close">✕</button>
-        <div id="modalContent"></div>
+  <div class="main">
+    <div class="card" style="grid-column:1/-1">
+      <img id="profileAvatar" src="default-avatar.png" class="avatar-lg">
+      <h2 id="profileName">Nom</h2>
+      <p id="profileBio">Bio...</p>
+      <div>Posts: <span id="profilePosts">0</span></div>
+      <div>Abonnés: <span id="profileFollowers">0</span></div>
+      <div>Abonnements: <span id="profileFollowing">0</span></div>
+      <div>Points: <span id="profilePoints">0</span></div>
+      <button id="editProfileBtn">Éditer profil</button>
+      <div id="profileEdit" class="hidden">
+        <input id="inputName" placeholder="Nom"><br>
+        <input id="inputEmail" placeholder="Email"><br>
+        <textarea id="inputBio" placeholder="Bio"></textarea><br>
+        <button id="saveProfile">Enregistrer</button>
       </div>
     </div>
 
-    <!-- Toast -->
-    <div class="toast" id="toastProfile" aria-hidden="true"></div>
+    <div class="card">
+      <h3>Mes posts</h3>
+      <div id="userPosts"></div>
+    </div>
+
+    <div class="card">
+      <h3>Abonnements</h3>
+      <div id="followingList"></div>
+    </div>
+
+    <div class="card">
+      <h3>Abonnés</h3>
+      <div id="followersList"></div>
+    </div>
+
+    <div class="card">
+      <h3>Notifications</h3>
+      <div id="notificationsProfile"></div>
+    </div>
+
+    <div class="card">
+      <h3>Défis</h3>
+      <ul id="dailyChallenges"></ul>
+    </div>
   </div>
 
   <script src="script.js"></script>
